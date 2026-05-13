@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "skills": {
+    "accessibility": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/accessibility/SKILL.md",
+      "computedHash": "e5639db209a6a93db908bf52dc6f6044738ab33088aa4b75e4befcd9410c1d15"
+    },
+    "ai-regression-testing": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/ai-regression-testing/SKILL.md",
+      "computedHash": "1597a649a5100015a30462cfba9b89b0fa8daa65e7e84d0e8556d8fb5ec26e63"
+    },
+    "backend-patterns": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/backend-patterns/SKILL.md",
+      "computedHash": "4872c9e2d4b474620f350c5bc625f7d34fc4a4fa5cfa2ff90637ee8b3f4ca143"
+    },
+    "ckm:ui-styling": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-styling/SKILL.md",
+      "computedHash": "b5f892864e479f969820c353f44faeedc61981bf2d7a854367069a80e0a264e1"
+    },
+    "deployment-patterns": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/deployment-patterns/SKILL.md",
+      "computedHash": "1a8a000f5ca0d10119ecc332d6dfe14e10c275219b87e78aaa9436a38e0caa75"
+    },
+    "frontend-patterns": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-patterns/SKILL.md",
+      "computedHash": "4c2920da9aef340538f2d579f465fd99c5b679d4afa0daba775215c0e506d0b1"
+    },
+    "git-workflow": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/git-workflow/SKILL.md",
+      "computedHash": "61dec9633cd2466b9923dcb9210069d360cbb7bdb1e8506a0565cc23ca0bbfcb"
+    },
+    "prompt-optimizer": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/prompt-optimizer/SKILL.md",
+      "computedHash": "eac7e4542b5cd1613ccf46e1d85ffd154cebf2de91e279bdf6508a7f66e04dcc"
+    },
+    "security-review": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/security-review/SKILL.md",
+      "computedHash": "ea603d81b60a1d14d19e33895a33a540837a0470e33105c1024557937ac01704"
+    }
+  }
+}
