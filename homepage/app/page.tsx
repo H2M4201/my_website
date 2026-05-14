@@ -1,9 +1,8 @@
 'use client'
 
-import { NavBar, NavBrand, NavLinks, NavLinkItem } from '@/components/NavBar'
+
 import { Layout, MainContent } from '@/components/Layout'
 import { SectionCard } from '@/components/SectionCard'
-import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 
 /**
@@ -11,24 +10,8 @@ import { motion } from 'framer-motion'
  * Demonstrates composition pattern with modular components
  */
 export default function Home() {
-  const pathname = usePathname()
-
   return (
     <Layout>
-      {/* Navigation Bar */}
-      <NavBar>
-        <NavBrand>Portfolio</NavBrand>
-        <NavLinks>
-          <NavLinkItem href="/" label="Home" isActive={pathname === '/'} />
-          <NavLinkItem href="/about" label="About Me" isActive={pathname === '/about'} />
-          <NavLinkItem href="/resume" label="Resume" isActive={pathname === '/resume'} />
-          <NavLinkItem href="/trips" label="Trips" isActive={pathname === '/trips'} />
-          <NavLinkItem href="/blogs" label="Blogs" isActive={pathname === '/blogs'} />
-          <NavLinkItem href="/recipe" label="Recipe" isActive={pathname === '/recipe'} />
-        </NavLinks>
-      </NavBar>
-
-      {/* Main Content Area */}
       <MainContent>
         {/* Page Header with Animations */}
         <motion.div
@@ -55,18 +38,16 @@ export default function Home() {
           </motion.p>
         </motion.div>
 
-        {/* Sections Grid - Demonstrates responsive layout with Tailwind */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <SectionCard
-            title="About Me"
-            description="Learn more about my background, skills, and what drives my passion for frontend development."
-            href="/about"
-            images={[
-              'https://images.unsplash.com/photo-1511367461989-f85a21fda167?auto=format&fit=crop&w=400&q=80',
-              'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-            ]}
-          />
+        {/* About Me Content */}
+        <section className="mb-16 max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-4 text-blue-700 dark:text-blue-300">About Me</h2>
+          <p className="text-lg text-slate-700 dark:text-slate-300">
+            I am a passionate frontend developer with 30 years of experience building beautiful, performant, and accessible web applications. My journey has taken me through countless projects, teams, and technologies, always with a focus on user experience and code quality.
+          </p>
+        </section>
 
+        {/* Section Cards - 4x1 grid on large screens */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-16">
           <SectionCard
             title="Resume"
             description="View my professional experience, education, and technical skills accumulated over decades."
@@ -76,7 +57,6 @@ export default function Home() {
               'https://images.unsplash.com/photo-1453928582365-b6ad33cbcf64?auto=format&fit=crop&w=400&q=80',
             ]}
           />
-
           <SectionCard
             title="Trips"
             description="Discover the amazing places I've traveled and the experiences I've collected around the world."
@@ -86,7 +66,6 @@ export default function Home() {
               'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
             ]}
           />
-
           <SectionCard
             title="Blogs"
             description="Read my thoughts on frontend development, best practices, and industry insights."
@@ -96,7 +75,6 @@ export default function Home() {
               'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80',
             ]}
           />
-
           <SectionCard
             title="Recipe"
             description="Explore my favorite recipes and culinary adventures outside of coding."
@@ -106,17 +84,18 @@ export default function Home() {
               'https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80',
             ]}
           />
-
-          <SectionCard
-            title="Contact"
-            description="Get in touch with me for collaboration opportunities or just to say hello."
-            href="#contact"
-            images={[
-              'https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?auto=format&fit=crop&w=400&q=80',
-              'https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=400&q=80',
-            ]}
-          />
         </div>
+
+        {/* Contact Content */}
+        <section id="contact" className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-4 text-blue-700 dark:text-blue-300">Contact</h2>
+          <p className="text-lg text-slate-700 dark:text-slate-300 mb-4">
+            Interested in collaborating or just want to say hello? Feel free to reach out!
+          </p>
+          <a href="mailto:your.email@example.com" className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold shadow hover:bg-blue-700 transition-colors">
+            Email Me
+          </a>
+        </section>
       </MainContent>
     </Layout>
   )

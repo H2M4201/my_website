@@ -1,8 +1,6 @@
-
 import Link from 'next/link'
-import React from 'react'
 import { motion } from 'framer-motion'
-
+import { MouseEvent, useEffect, useState } from 'react'
 
 interface SectionCardProps {
   title: string
@@ -23,8 +21,21 @@ export function SectionCard({
   images = [],
   variant = 'default',
 }: SectionCardProps) {
-  const [current, setCurrent] = React.useState(0)
+  const [current, setCurrent] = useState(0)
+  const [hovering, setHovering] = useState(false)
   const hasImages = images && images.length > 0
+
+  useEffect(() => {
+    if (!hovering || !hasImages || images.length <= 1) {
+      return
+    }
+
+    const timer = window.setInterval(() => {
+      setCurrent((prev) => (prev + 1) % images.length)
+    }, 2200)
+
+    return () => window.clearInterval(timer)
+  }, [hovering, hasImages, images.length])
   
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -56,6 +67,8 @@ export function SectionCard({
 
   return (
     <motion.div 
+      onPointerEnter={() => setHovering(true)}
+      onPointerLeave={() => setHovering(false)}
       variants={containerVariants}
       initial="hidden"
       whileInView="visible"

@@ -1,31 +1,15 @@
 'use client'
 
-import { NavBar, NavBrand, NavLinks, NavLinkItem } from '@/components/NavBar'
 import { Layout, MainContent } from '@/components/Layout'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 
 /**
  * About page component
  * Demonstrates modular component composition
  */
 export default function About() {
-  const pathname = usePathname()
-
   return (
     <Layout>
-      <NavBar>
-        <NavBrand>Portfolio</NavBrand>
-        <NavLinks>
-          <NavLinkItem href="/" label="Home" isActive={pathname === '/'} />
-          <NavLinkItem href="/about" label="About Me" isActive={pathname === '/about'} />
-          <NavLinkItem href="/resume" label="Resume" isActive={pathname === '/resume'} />
-          <NavLinkItem href="/trips" label="Trips" isActive={pathname === '/trips'} />
-          <NavLinkItem href="/blogs" label="Blogs" isActive={pathname === '/blogs'} />
-          <NavLinkItem href="/recipe" label="Recipe" isActive={pathname === '/recipe'} />
-        </NavLinks>
-      </NavBar>
-
       <MainContent>
         <div className="bg-white dark:bg-zinc-900 p-8 rounded-lg shadow-md">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6">About Me</h1>
@@ -47,7 +31,7 @@ export default function About() {
             href="/"
             className="inline-block mt-8 px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors"
           >
-             Back Home
+             ← Back Home
           </Link>
         </div>
       </MainContent>
