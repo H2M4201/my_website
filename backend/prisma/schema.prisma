@@ -1,0 +1,53 @@
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Section {
+  id          Int     @id @default(autoincrement())
+  SectionName String  @db.NVarChar(100)
+  Description String? @db.NVarChar(500)
+  Href        String? @db.NVarChar(255)
+
+  @@map("Section")
+}
+
+model Contact {
+  id          Int     @id @default(autoincrement())
+  ContactType String  @db.NVarChar(50)
+  ContactInfo String  @db.NVarChar(255)
+  Icon        String? @db.NVarChar(100)
+
+  @@map("Contact")
+}
+
+model Blog {
+  id          Int     @id @default(autoincrement())
+  Title       String  @db.NVarChar(255)
+  Description String? @db.NVarChar(1000)
+  Content     String? @db.NVarChar(max)
+
+  @@map("Blog")
+}
+
+model Trip {
+  id        Int     @id @default(autoincrement())
+  Title     String  @db.NVarChar(255)
+  Time      String? @db.NVarChar(100)
+  Location  String? @db.NVarChar(255)
+  Content   String? @db.NVarChar(max)
+
+  @@map("Trip")
+}
+
+model Recipe {
+  id          Int     @id @default(autoincrement())
+  Name        String  @db.NVarChar(255)
+  Description String? @db.NVarChar(1000)
+
+  @@map("Recipe")
+}

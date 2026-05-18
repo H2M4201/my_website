@@ -1,0 +1,5 @@
+export * from './sectionDTO'
+export * from './contactDTO'
+export * from './blogDTO'
+export * from './tripDTO'
+export * from './recipeDTO'
