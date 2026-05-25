@@ -1,5 +1,11 @@
 {
+  "scripts": {
+    "dev:ssl": "concurrently -n homepage,admin,backend -c cyan,magenta,yellow \"cd homepage && npm run dev:ssl\" \"cd adminPage && npm run dev:ssl\" \"cd backend && npm run dev:ssl\""
+  },
   "dependencies": {
     "lucide-react": "^1.14.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
   }
 }

@@ -51,3 +51,21 @@ model Recipe {
 
   @@map("Recipe")
 }
+
+model AdminUser {
+  id                    Int       @id @default(autoincrement())
+  username              String    @unique @db.NVarChar(100)
+  password              String    @db.NVarChar(255)
+  email                 String?   @db.NVarChar(255)
+  name                  String?   @db.NVarChar(255)
+  roleId                Int?
+  failedLoginAttempts   Int       @default(0)
+  lockedUntil           DateTime?
+  passwordChangedAt     DateTime?
+  passwordResetToken    String?   @db.NVarChar(255)
+  passwordResetTokenExpires DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("AdminUser")
+}

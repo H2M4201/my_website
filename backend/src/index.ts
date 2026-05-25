@@ -5,5 +5,5 @@ const port = Number(process.env.PORT || 4000)
 const app = createApp()
 
 app.listen(port, () => {
-  console.log(`Backend API listening on http://127.0.0.1:${port}`)
+  console.log(`Backend API listening on https://127.0.0.1:${port}`)
 })
