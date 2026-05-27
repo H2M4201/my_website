@@ -16,43 +16,66 @@ import {
   getAllRecipes, getRecipeById, createRecipe, updateRecipe, deleteRecipe, RecipeNotFoundError,
 } from '../db'
 import {
+  getAllExperiences, getExperienceById, createExperience, updateExperience, deleteExperience, ExperienceNotFoundError,
+} from '../db'
+import {
+  getAllExpertiseCategories, getExpertiseCategoryById, createExpertiseCategory, updateExpertiseCategory, deleteExpertiseCategory, ExpertiseCategoryNotFoundError,
+} from '../db'
+import {
+  getAllJobDescriptions, getJobDescriptionById, createJobDescription, updateJobDescription, deleteJobDescription, JobDescriptionNotFoundError,
+} from '../db'
+import {
   sectionIdParamSchema, createSectionRequestSchema, updateSectionRequestSchema, sectionResponseSchema,
   contactIdParamSchema, createContactRequestSchema, updateContactRequestSchema, contactResponseSchema,
   blogIdParamSchema, createBlogRequestSchema, updateBlogRequestSchema, blogResponseSchema,
   tripIdParamSchema, createTripRequestSchema, updateTripRequestSchema, tripResponseSchema,
   recipeIdParamSchema, createRecipeRequestSchema, updateRecipeRequestSchema, recipeResponseSchema,
+  experienceIdParamSchema, createExperienceRequestSchema, updateExperienceRequestSchema, experienceResponseSchema,
+  expertiseCategoryIdParamSchema, createExpertiseCategoryRequestSchema, updateExpertiseCategoryRequestSchema, expertiseCategoryResponseSchema,
+  jobDescriptionIdParamSchema, createJobDescriptionRequestSchema, updateJobDescriptionRequestSchema, jobDescriptionResponseSchema,
 } from './schemas'
 
-// ===== Shared secret for homepage revalidation webhook =====
+// ===== Shared secret for frontend revalidation webhooks =====
 const REVALIDATION_SECRET = process.env.REVALIDATION_SECRET || 'dev-secret-change-in-production'
-const HOMEPAGE_REVALIDATION_URL = process.env.HOMEPAGE_URL
-  ? `${process.env.HOMEPAGE_URL.replace(/\/$/, '')}/api/revalidate`
-  : 'https://localhost:5000/api/revalidate'
+
+/** List of frontend URLs to notify after admin CRUD operations */
+const FRONTEND_URLS = (process.env.FRONTEND_URLS || 'https://localhost:3000,https://localhost:5000')
+  .split(',')
+  .map(url => `${url.trim().replace(/\/$/, '')}/api/revalidate`)
 
 /**
- * Sends a POST request to the homepage's revalidation endpoint after any admin CRUD operation.
- * This ensures the homepage ISR cache is invalidated and reflects changes in real time.
+ * Sends a POST request to ALL frontend revalidation endpoints after any admin CRUD operation.
+ * This ensures all frontends (homepage, adminPage) reflect changes in real time.
  * Uses a fire-and-forget pattern so it doesn't block the API response.
  */
-async function revalidateHomepageCache(resource: string): Promise<void> {
-  try {
-    const response = await fetch(HOMEPAGE_REVALIDATION_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        secret: REVALIDATION_SECRET,
-        tag: resource, // e.g. 'sections', 'contacts', etc.
-      }),
+async function revalidateFrontendCaches(resource: string): Promise<void> {
+  const results = await Promise.allSettled(
+    FRONTEND_URLS.map(async (url) => {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          secret: REVALIDATION_SECRET,
+          tag: resource,
+        }),
+      })
+      if (response.ok) {
+        console.log(`[Revalidate] ✅ ${url} revalidated for "${resource}"`)
+      } else {
+        console.warn(`[Revalidate] ⚠️ ${url} returned ${response.status}`)
+      }
+      return response
     })
-    if (response.ok) {
-      console.log(`[Revalidate] ✅ Homepage cache revalidated for "${resource}"`)
-    } else {
-      console.warn(`[Revalidate] ⚠️ Homepage revalidation returned ${response.status}`)
+  )
+
+  results.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      console.warn(
+        `[Revalidate] ⚠️ Failed to notify ${FRONTEND_URLS[index]} for "${resource}":`,
+        result.reason?.message || result.reason
+      )
     }
-  } catch (error) {
-    // Fire-and-forget: don't crash the API if revalidation fails
-    console.warn(`[Revalidate] ⚠️ Failed to revalidate homepage cache for "${resource}":`, (error as Error).message)
-  }
+  })
 }
 
 // ===== Centralized admin API prefix =====
@@ -133,6 +156,42 @@ const resourceHandlers: Record<string, ResourceHandlers> = {
     responseSchema: recipeResponseSchema,
     notFoundError: RecipeNotFoundError,
   },
+  experience: {
+    getAll: () => getAllExperiences(true),
+    getById: getExperienceById,
+    create: createExperience,
+    update: updateExperience,
+    delete: deleteExperience,
+    idSchema: experienceIdParamSchema,
+    createSchema: createExperienceRequestSchema,
+    updateSchema: updateExperienceRequestSchema,
+    responseSchema: experienceResponseSchema,
+    notFoundError: ExperienceNotFoundError,
+  },
+  expertise: {
+    getAll: getAllExpertiseCategories,
+    getById: getExpertiseCategoryById,
+    create: createExpertiseCategory,
+    update: updateExpertiseCategory,
+    delete: deleteExpertiseCategory,
+    idSchema: expertiseCategoryIdParamSchema,
+    createSchema: createExpertiseCategoryRequestSchema,
+    updateSchema: updateExpertiseCategoryRequestSchema,
+    responseSchema: expertiseCategoryResponseSchema,
+    notFoundError: ExpertiseCategoryNotFoundError,
+  },
+  'job-description': {
+    getAll: getAllJobDescriptions,
+    getById: getJobDescriptionById,
+    create: createJobDescription,
+    update: updateJobDescription,
+    delete: deleteJobDescription,
+    idSchema: jobDescriptionIdParamSchema,
+    createSchema: createJobDescriptionRequestSchema,
+    updateSchema: updateJobDescriptionRequestSchema,
+    responseSchema: jobDescriptionResponseSchema,
+    notFoundError: JobDescriptionNotFoundError,
+  },
 }
 
 // ===== Admin CRUD Router =====
@@ -176,7 +235,10 @@ adminRouter.get('/:resource/:id', async (req, res) => {
         error instanceof ContactNotFoundError ||
         error instanceof BlogNotFoundError ||
         error instanceof TripNotFoundError ||
-        error instanceof RecipeNotFoundError) {
+        error instanceof RecipeNotFoundError ||
+        error instanceof ExperienceNotFoundError ||
+        error instanceof ExpertiseCategoryNotFoundError ||
+        error instanceof JobDescriptionNotFoundError) {
       res.status(404).json({ error: (error as Error).message })
       return
     }
@@ -197,8 +259,8 @@ adminRouter.post('/create/:resource', async (req, res) => {
     const data = handlers.createSchema.parse(req.body)
     const item = await handlers.create(data)
     const validated = handlers.responseSchema.parse(item)
-    // Fire revalidation webhook for homepage cache
-    revalidateHomepageCache(resource)
+    // Fire revalidation webhooks to all frontends
+    revalidateFrontendCaches(resource)
     res.status(201).json(validated)
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -223,8 +285,8 @@ adminRouter.patch('/update/:resource/:id', async (req, res) => {
     const data = handlers.updateSchema.parse(req.body)
     const item = await handlers.update(id, data)
     const validated = handlers.responseSchema.parse(item)
-    // Fire revalidation webhook for homepage cache
-    revalidateHomepageCache(resource)
+    // Fire revalidation webhooks to all frontends
+    revalidateFrontendCaches(resource)
     res.status(200).json(validated)
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -235,7 +297,10 @@ adminRouter.patch('/update/:resource/:id', async (req, res) => {
         error instanceof ContactNotFoundError ||
         error instanceof BlogNotFoundError ||
         error instanceof TripNotFoundError ||
-        error instanceof RecipeNotFoundError) {
+        error instanceof RecipeNotFoundError ||
+        error instanceof ExperienceNotFoundError ||
+        error instanceof ExpertiseCategoryNotFoundError ||
+        error instanceof JobDescriptionNotFoundError) {
       res.status(404).json({ error: (error as Error).message })
       return
     }
@@ -255,8 +320,8 @@ adminRouter.delete('/delete/:resource/:id', async (req, res) => {
   try {
     const id = handlers.idSchema.parse(req.params.id)
     await handlers.delete(id)
-    // Fire revalidation webhook for homepage cache
-    revalidateHomepageCache(resource)
+    // Fire revalidation webhooks to all frontends
+    revalidateFrontendCaches(resource)
     res.status(204).send()
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -267,7 +332,10 @@ adminRouter.delete('/delete/:resource/:id', async (req, res) => {
         error instanceof ContactNotFoundError ||
         error instanceof BlogNotFoundError ||
         error instanceof TripNotFoundError ||
-        error instanceof RecipeNotFoundError) {
+        error instanceof RecipeNotFoundError ||
+        error instanceof ExperienceNotFoundError ||
+        error instanceof ExpertiseCategoryNotFoundError ||
+        error instanceof JobDescriptionNotFoundError) {
       res.status(404).json({ error: (error as Error).message })
       return
     }

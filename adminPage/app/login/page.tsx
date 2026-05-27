@@ -124,23 +124,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-950 to-gray-900 flex items-center justify-center p-4">
+      <div className="bg-gray-800 rounded-lg shadow-xl p-8 max-w-md w-full border border-gray-700">
 
         {view === 'login' && (
           <>
-            <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">Admin Login</h1>
+            <h1 className="text-3xl font-bold text-center mb-8 text-gray-100">Admin Login</h1>
 
             {accountLocked && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded text-sm">
+              <div className="alert-error mb-4">
                 <p className="font-semibold">Account Locked</p>
                 <p>Too many failed login attempts. Your account has been locked for 15 minutes.</p>
                 {lockedUntil && (
-                  <p className="mt-1 text-xs text-red-500">
+                  <p className="mt-1 text-xs text-red-400">
                     Locked until: {new Date(lockedUntil).toLocaleTimeString()}
                   </p>
                 )}
-                <p className="mt-1 text-xs text-red-500">
+                <p className="mt-1 text-xs text-red-400">
                   Please try again later or use the "Forgot Password" option below to reset your password.
                 </p>
               </div>
@@ -170,7 +170,7 @@ export default function LoginPage() {
               </FormField>
 
               {error && (
-                <div className="p-3 bg-red-50 text-red-700 rounded text-sm">{error}</div>
+                <div className="alert-error">{error}</div>
               )}
 
               <button
@@ -192,13 +192,13 @@ export default function LoginPage() {
                   setResetError('')
                   setTempPassword('')
                 }}
-                className="text-sm text-blue-600 hover:text-blue-800 underline"
+                className="text-sm text-blue-400 hover:text-blue-300 underline"
               >
                 Forgot Password?
               </button>
             </div>
 
-            <p className="text-sm text-gray-600 text-center mt-4">
+            <p className="text-sm text-gray-400 text-center mt-4">
               Demo: Use username "admin" to login
             </p>
           </>
@@ -206,8 +206,8 @@ export default function LoginPage() {
 
         {view === 'forgot-password' && (
           <>
-            <h1 className="text-3xl font-bold text-center mb-4 text-gray-800">Reset Password</h1>
-            <p className="text-sm text-gray-600 text-center mb-6">
+            <h1 className="text-3xl font-bold text-center mb-4 text-gray-100">Reset Password</h1>
+            <p className="text-sm text-gray-400 text-center mb-6">
               Enter your username or registered email address and we will send you a new password.
             </p>
 
@@ -224,14 +224,14 @@ export default function LoginPage() {
               </FormField>
 
               {resetError && (
-                <div className="p-3 bg-red-50 text-red-700 rounded text-sm">{resetError}</div>
+                <div className="alert-error">{resetError}</div>
               )}
 
               {resetMessage && (
-                <div className="p-3 bg-green-50 text-green-700 rounded text-sm">
+                <div className="alert-success">
                   <p>{resetMessage}</p>
                   {tempPassword && (
-                    <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
+                    <div className="mt-2 p-2 alert-info">
                       <p className="font-semibold text-xs">Development Mode — Temporary Password:</p>
                       <p className="font-mono text-lg font-bold tracking-wider select-all">{tempPassword}</p>
                       <p className="text-xs mt-1">Please copy this password and use it to login.</p>
@@ -253,7 +253,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setView('login')}
-                className="text-sm text-blue-600 hover:text-blue-800 underline"
+                className="text-sm text-blue-400 hover:text-blue-300 underline"
               >
                 Back to Login
               </button>
@@ -263,13 +263,13 @@ export default function LoginPage() {
 
         {view === 'change-password' && (
           <>
-            <h1 className="text-3xl font-bold text-center mb-2 text-gray-800">Change Password</h1>
+            <h1 className="text-3xl font-bold text-center mb-2 text-gray-100">Change Password</h1>
             {passwordExpired && (
-              <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded p-2 mb-4 text-center">
+              <div className="alert-info mb-4 text-center">
                 Your password has expired (over 60 days). Please set a new password.
-              </p>
+              </div>
             )}
-            <p className="text-sm text-gray-600 text-center mb-6">
+            <p className="text-sm text-gray-400 text-center mb-6">
               Password must contain at least 8 characters, including uppercase, lowercase, a digit, and a special character.
             </p>
 
@@ -308,11 +308,11 @@ export default function LoginPage() {
               </FormField>
 
               {changeError && (
-                <div className="p-3 bg-red-50 text-red-700 rounded text-sm">{changeError}</div>
+                <div className="alert-error">{changeError}</div>
               )}
 
               {changeSuccess && (
-                <div className="p-3 bg-green-50 text-green-700 rounded text-sm">{changeSuccess}</div>
+                <div className="alert-success">{changeSuccess}</div>
               )}
 
               <button
@@ -329,7 +329,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setView('login')}
-                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                  className="text-sm text-blue-400 hover:text-blue-300 underline"
                 >
                   Back to Login
                 </button>

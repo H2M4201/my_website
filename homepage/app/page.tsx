@@ -21,10 +21,10 @@ export default function Home() {
 
         {/* About Me Content */}
         <section className="mb-16 max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4 text-blue-700 dark:text-blue-300">
+          <h2 className="section-heading mb-4">
             About Me
           </h2>
-          <p className="text-lg text-slate-700 dark:text-slate-300">
+          <p className="text-body text-lg">
             I am a passionate frontend developer with 30 years of experience building beautiful,
             performant, and accessible web applications. My journey has taken me through countless
             projects, teams, and technologies, always with a focus on user experience and code
@@ -40,7 +40,7 @@ export default function Home() {
         {/* Contact Content - Dynamic */}
         <Suspense
           fallback={
-            <div className="h-48 bg-slate-100 dark:bg-zinc-800 rounded-lg animate-pulse mb-16" />
+            <div className="h-48 skeleton mb-16" />
           }
         >
           <ContactGridServer />
@@ -81,8 +81,8 @@ async function ContactGridServer() {
     const contacts = await getAllContacts()
 
     return (
-      <section id="contact" className="max-w-4xl mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-8 text-blue-700 dark:text-blue-300">Contact</h2>
+        <section id="contact" className="max-w-4xl mx-auto text-center">
+        <h2 className="section-heading mb-8">Contact</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {contacts.map((contact) => (
             <ContactCard key={contact.id} contact={contact} />
@@ -124,13 +124,13 @@ function ContactCard({ contact }: { contact: ContactDTO }) {
       href={getHref()}
       target={isExternal ? '_blank' : undefined}
       rel={isExternal ? 'noopener noreferrer' : undefined}
-      className="flex flex-col items-center p-6 bg-white dark:bg-zinc-800 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-slate-100 dark:border-zinc-700"
+      className="flex flex-col items-center p-6 card-dark card-dark-hover"
     >
-      <div className="w-8 h-8 text-blue-600 dark:text-blue-400 mb-3">{IconComponent}</div>
-      <span className="font-medium text-slate-800 dark:text-slate-200 capitalize">
+      <div className="w-8 h-8 text-accent mb-3">{IconComponent}</div>
+      <span className="font-medium text-heading capitalize">
         {contact.type}
       </span>
-      <span className="text-sm text-slate-500 dark:text-slate-400 mt-1 truncate w-full">
+      <span className="text-sm text-muted mt-1 truncate w-full">
         {contact.info}
       </span>
     </a>

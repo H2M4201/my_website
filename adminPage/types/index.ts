@@ -53,6 +53,46 @@ export interface Resume {
   content: string | null
 }
 
+export interface JobDescription {
+  id: number
+  description: string
+  sortOrder: number
+  experienceId: number
+}
+
+export interface ExperienceSkill {
+  id: number
+  skill: string
+  sortOrder: number
+  experienceId: number
+}
+
+export interface Experience {
+  id: number
+  title: string
+  company: string
+  period: string
+  achievement: string | null
+  isActive: boolean
+  sortOrder: number
+  jobDescriptions: JobDescription[]
+  skills: ExperienceSkill[]
+}
+
+export interface ExpertiseSkill {
+  id: number
+  skill: string
+  sortOrder: number
+  expertiseCategoryId: number
+}
+
+export interface ExpertiseCategory {
+  id: number
+  category: string
+  sortOrder: number
+  skills: ExpertiseSkill[]
+}
+
 export interface Role {
   id: number
   name: string
@@ -80,6 +120,9 @@ export type ResourceType =
   | 'trip'
   | 'recipe'
   | 'resume'
+  | 'experience'
+  | 'expertise'
+  | 'job-description'
   | 'user'
   | 'role'
   | 'permission'

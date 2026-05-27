@@ -40,3 +40,109 @@
 		--ring: 212.7 26.8% 83.9%;
 	}
 }
+
+@layer components {
+	/* ====== HOMEPAGE THEME UTILITIES ====== */
+	/* Edit these classes to change the entire homepage theme */
+
+	/* Page background */
+	.page-bg {
+		@apply bg-gradient-to-br from-slate-900 via-gray-900 to-blue-950;
+	}
+
+	/* Navbar */
+	.navbar-bg {
+		@apply bg-gray-900/80 backdrop-blur-xl border-b border-slate-700;
+	}
+	.nav-link {
+		@apply text-slate-300 hover:text-blue-400;
+	}
+	.nav-link-active {
+		@apply bg-blue-600 text-white shadow-lg shadow-blue-600/50;
+	}
+
+	/* Section headings */
+	.section-heading {
+		@apply text-3xl font-bold text-blue-400;
+	}
+	.section-subheading {
+		@apply text-lg text-slate-300;
+	}
+
+	/* Cards */
+	.card-dark {
+		@apply bg-gray-800 rounded-xl border border-slate-700;
+	}
+	.card-dark-hover {
+		@apply hover:shadow-md transition-all hover:-translate-y-1;
+	}
+
+	/* Text colors */
+	.text-body {
+		@apply text-slate-300;
+	}
+	.text-muted {
+		@apply text-slate-400;
+	}
+	.text-heading {
+		@apply text-gray-100;
+	}
+	.text-accent {
+		@apply text-blue-400;
+	}
+
+	/* Badge / Tag */
+	.tag {
+		@apply px-2 py-1 bg-blue-900/40 text-blue-300 rounded text-xs font-semibold;
+	}
+	.tag-skill {
+		@apply px-3.5 py-1.5 bg-gradient-to-br from-blue-900/40 to-blue-800/30 text-blue-300 text-sm font-semibold rounded-xl border border-blue-700/50 shadow-sm hover:shadow-md hover:from-blue-800/60 hover:to-blue-700/50 transition-all;
+	}
+	.tag-project {
+		@apply text-[10px] px-2 py-0.5 bg-zinc-800 rounded text-zinc-400 font-medium;
+	}
+
+	/* Skeleton loading */
+	.skeleton {
+		@apply bg-slate-800 rounded-lg animate-pulse;
+	}
+
+	/* Timeline */
+	.timeline-line {
+		@apply before:bg-gradient-to-b before:from-transparent before:via-blue-800 before:to-transparent;
+	}
+	.timeline-card {
+		@apply bg-gray-800 p-6 rounded-xl border border-blue-900/30;
+	}
+	.timeline-dot {
+		@apply flex items-center justify-center w-10 h-10 rounded-full border border-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2;
+	}
+
+	/* Gradient text */
+	.gradient-text {
+		@apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+	}
+
+	/* Resume specific */
+	.resume-hero {
+		@apply w-full py-20 bg-gradient-to-b from-blue-950/40 via-gray-900 to-gray-900;
+	}
+	.resume-section-alt {
+		@apply w-full py-16 bg-gray-900/50;
+	}
+	.resume-section-white {
+		@apply w-full py-20 bg-gray-900/30;
+	}
+	.resume-section-zinc {
+		@apply w-full py-20 bg-zinc-900/30;
+	}
+	.education-card {
+		@apply col-span-1 bg-gradient-to-br from-blue-950/60 to-gray-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all border border-blue-900/30;
+	}
+	.expertise-card {
+		@apply bg-gray-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all border border-gray-700 hover:border-blue-700 hover:-translate-y-1;
+	}
+	.project-card {
+		@apply overflow-hidden border-none shadow-lg hover:shadow-xl transition-shadow bg-gray-800;
+	}
+}

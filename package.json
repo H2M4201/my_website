@@ -3,7 +3,11 @@
     "dev:ssl": "concurrently -n homepage,admin,backend -c cyan,magenta,yellow \"cd homepage && npm run dev:ssl\" \"cd adminPage && npm run dev:ssl\" \"cd backend && npm run dev:ssl\""
   },
   "dependencies": {
-    "lucide-react": "^1.14.0"
+    "lucide-react": "^1.14.0",
+    "next": "13.4.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-hook-form": "^7.43.1"
   },
   "devDependencies": {
     "concurrently": "^9.0.0"

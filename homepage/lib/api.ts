@@ -1,10 +1,15 @@
-import type { ContactDTO, SectionDTO } from './dto'
+import type {
+  ContactDTO,
+  SectionDTO,
+  ExperienceDTO,
+  ExpertiseCategoryDTO,
+} from './dto'
 
 function getApiBaseUrl(): string {
   return (
     process.env.API_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
-    'http://127.0.0.1:4000'
+    'https://127.0.0.1:4000'
   ).replace(/\/$/, '')
 }
 
@@ -86,3 +91,60 @@ export async function getAllContacts(): Promise<ContactDTO[]> {
     throw error
   }
 }
+
+// ===== Resume API Functions =====
+
+export async function getAllExperiences(): Promise<ExperienceDTO[]> {
+  try {
+    const url = `${getApiBaseUrl()}/api/v1/resume/experiences`
+
+    const response = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+      next: { tags: ['resume'], revalidate: DEFAULT_REVALIDATION },
+    })
+    console.log(`[Homepage] 🚀 GET ${url}`)
+
+    if (!response.ok) {
+      console.error(`[Homepage] ❌ GET ${url} → ${response.status}`)
+      throw new Error(`HTTP ${response.status}: Failed to fetch experiences`)
+    }
+
+    const data = await response.json()
+    console.log(`[Homepage] ✅ GET ${url} → ${response.status} (${Array.isArray(data) ? data.length : 1} items)`)
+    return data
+  } catch (error) {
+    console.error('[Homepage] getAllExperiences error:', error)
+    throw error
+  }
+}
+
+export async function getAllExpertiseCategories(): Promise<ExpertiseCategoryDTO[]> {
+  try {
+    const url = `${getApiBaseUrl()}/api/v1/resume/expertise`
+
+    const response = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+      next: { tags: ['resume'], revalidate: DEFAULT_REVALIDATION },
+    })
+    console.log(`[Homepage] 🚀 GET ${url}`)
+
+    if (!response.ok) {
+      console.error(`[Homepage] ❌ GET ${url} → ${response.status}`)
+      throw new Error(`HTTP ${response.status}: Failed to fetch expertise categories`)
+    }
+
+    const data = await response.json()
+    console.log(`[Homepage] ✅ GET ${url} → ${response.status} (${Array.isArray(data) ? data.length : 1} items)`)
+    return data
+  } catch (error) {
+    console.error('[Homepage] getAllExpertiseCategories error:', error)
+    throw error
+  }
+}
+
+export type {
+  ContactDTO,
+  SectionDTO,
+  ExperienceDTO,
+  ExpertiseCategoryDTO,
+} from './dto'

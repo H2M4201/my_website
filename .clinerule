@@ -1,8 +1,8 @@
 1. When scanning codebase for context, do not look at files/folders that are not real code (unless specified in the prompt), such as: node_modules, .next, .git, .gitignore, .cert, .env, *.md files, package-lock.json, and similar non-code artifacts.
 
-2. When needing to look for a skill, look in the .agents/skills folder.
+2. When needing to look for a skill, from root folder, look in the .agents/skills folder.
 
-3. When being asked for code modification, only generate into output your modification and brief explanation.
+3. When being asked for code modification, only generate into output your modification and brief explanation. For each file that needs modification, only modify what needs modification and do not mess up other part that is not related.
 
 4. When being asked to explain something, only generate the answer without modifying any code or running any command.
 

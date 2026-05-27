@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Table, Modal, FormField, Input, Textarea } from '@/components'
-import { useFetchAll, deleteItem } from '@/hooks/useApi'
+import { useFetchAll, deleteItem, updateItem } from '@/hooks/useApi'
 import { ResourceType } from '@/types'
 
 interface CrudTemplateProps {
@@ -15,6 +15,8 @@ interface CrudTemplateProps {
   }>
   renderForm: (item: any | null, onChange: (data: any) => void, data: any) => React.ReactNode
   onSave: (data: any, id?: number) => Promise<void>
+  onToggleActive?: (item: any) => Promise<void>
+  getIsActive?: (item: any) => boolean
 }
 
 export function CrudTemplate({
@@ -23,6 +25,8 @@ export function CrudTemplate({
   columns,
   renderForm,
   onSave,
+  onToggleActive,
+  getIsActive,
 }: CrudTemplateProps) {
   const { items, isLoading, mutate } = useFetchAll(resource)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -56,6 +60,17 @@ export function CrudTemplate({
     }
   }
 
+  const handleToggleActive = async (item: any) => {
+    if (onToggleActive) {
+      try {
+        await onToggleActive(item)
+        mutate()
+      } catch (err: any) {
+        setError(err.message || 'Failed to toggle active status')
+      }
+    }
+  }
+
   const handleSubmit = async () => {
     try {
       setIsSaving(true)
@@ -80,7 +95,7 @@ export function CrudTemplate({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">{title}</h1>
+        <h1 className="dashboard-title">{title}</h1>
         <button
           onClick={handleCreate}
           className="btn-primary flex items-center gap-2"
@@ -91,7 +106,7 @@ export function CrudTemplate({
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
+        <div className="alert-error">
           {error}
         </div>
       )}
@@ -101,6 +116,8 @@ export function CrudTemplate({
         columns={tableColumns}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onToggleActive={onToggleActive ? handleToggleActive : undefined}
+        getIsActive={getIsActive}
         isLoading={isLoading}
       />
 

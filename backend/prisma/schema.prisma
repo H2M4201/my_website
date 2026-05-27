@@ -52,6 +52,68 @@ model Recipe {
   @@map("Recipe")
 }
 
+model Experience {
+  id          Int      @id @default(autoincrement())
+  Title       String   @db.NVarChar(255)
+  Company     String   @db.NVarChar(255)
+  Period      String   @db.NVarChar(100)
+  Achievement String?  @db.NVarChar(1000)
+  IsActive    Boolean  @default(true)
+  SortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  jobDescriptions JobDescription[]
+  skills          ExperienceSkill[]
+
+  @@map("Experience")
+}
+
+model JobDescription {
+  id          Int      @id @default(autoincrement())
+  Description String   @db.NVarChar(1000)
+  SortOrder   Int      @default(0)
+  experienceId Int
+
+  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+
+  @@map("JobDescription")
+}
+
+model ExperienceSkill {
+  id           Int      @id @default(autoincrement())
+  Skill        String   @db.NVarChar(100)
+  SortOrder    Int      @default(0)
+  experienceId Int
+
+  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+
+  @@map("ExperienceSkill")
+}
+
+model ExpertiseCategory {
+  id          Int      @id @default(autoincrement())
+  Category    String   @db.NVarChar(100)
+  SortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  skills      ExpertiseSkill[]
+
+  @@map("ExpertiseCategory")
+}
+
+model ExpertiseSkill {
+  id                 Int      @id @default(autoincrement())
+  Skill              String   @db.NVarChar(100)
+  SortOrder          Int      @default(0)
+  expertiseCategoryId Int
+
+  category ExpertiseCategory @relation(fields: [expertiseCategoryId], references: [id], onDelete: Cascade)
+
+  @@map("ExpertiseSkill")
+}
+
 model AdminUser {
   id                    Int       @id @default(autoincrement())
   username              String    @unique @db.NVarChar(100)

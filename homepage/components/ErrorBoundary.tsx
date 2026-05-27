@@ -4,7 +4,7 @@ import { AlertCircle } from 'lucide-react'
 
 interface ErrorBoundaryProps {
   message: string
-  section?: 'sections' | 'contacts'
+  section?: 'sections' | 'contacts' | 'content'
   onRetry?: () => void
 }
 

@@ -25,7 +25,7 @@ export function Layout({ children }: LayoutProps) {
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href)
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 transition-colors duration-300">
+    <div className="min-h-screen flex flex-col page-bg">
       <NavBar>
         <NavBrand>Portfolio</NavBrand>
         <NavLinks>

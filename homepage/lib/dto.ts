@@ -13,3 +13,45 @@ export interface ContactDTO {
   info: string
   icon: string | null
 }
+
+// ===== Resume DTOs =====
+
+export interface JobDescriptionDTO {
+  id: number
+  description: string
+  sortOrder: number
+  experienceId: number
+}
+
+export interface ExperienceSkillDTO {
+  id: number
+  skill: string
+  sortOrder: number
+  experienceId: number
+}
+
+export interface ExperienceDTO {
+  id: number
+  title: string
+  company: string
+  period: string
+  achievement: string | null
+  isActive: boolean
+  sortOrder: number
+  jobDescriptions: JobDescriptionDTO[]
+  skills: ExperienceSkillDTO[]
+}
+
+export interface ExpertiseSkillDTO {
+  id: number
+  skill: string
+  sortOrder: number
+  expertiseCategoryId: number
+}
+
+export interface ExpertiseCategoryDTO {
+  id: number
+  category: string
+  sortOrder: number
+  skills: ExpertiseSkillDTO[]
+}
