@@ -117,11 +117,11 @@ function ExpertiseGrid({ categories }: { categories: ExpertiseCategoryDTO[] }) {
       <div className="max-w-5xl mx-auto px-4">
         <h2 className="section-heading mb-12 flex items-center gap-3">
           <GraduationCap className="w-8 h-8" />
-          Education & Expertise
+          Skill
         </h2>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Education Card */}
+        {/* <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          Education Card
           <div className="education-card">
             <h3 className="text-xl font-bold text-blue-300 mb-6 flex items-center gap-2">
               <GraduationCap className="w-6 h-6 text-blue-400" />
@@ -143,7 +143,7 @@ function ExpertiseGrid({ categories }: { categories: ExpertiseCategoryDTO[] }) {
                 <p className="text-sm text-muted">High proficiency in English communication</p>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Expertise Category Cards */}
           {categories.map((cat) => (
@@ -163,7 +163,7 @@ function ExpertiseGrid({ categories }: { categories: ExpertiseCategoryDTO[] }) {
               </div>
             </div>
           ))}
-        </div>
+        {/* </div> */}
       </div>
     </section>
   )

@@ -1,1 +1,5 @@
 node_modules
+
+# Docker
+docker/.env.docker.local
+*.backup.prisma

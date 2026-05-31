@@ -37,7 +37,7 @@ export function Modal({
           </button>
         </div>
 
-        <div className="p-6">{children}</div>
+        <div className="p-6 overflow-y-auto max-h-[60vh]">{children}</div>
 
         <div className="modal-footer">
           <button

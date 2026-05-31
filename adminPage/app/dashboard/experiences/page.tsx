@@ -25,10 +25,6 @@ export default function ExperiencesPage() {
     }
   }
 
-  const handleToggleActive = async (item: Experience) => {
-    await updateItem('experience', item.id, { isActive: !item.isActive })
-  }
-
   return (
     <CrudTemplate
       title="Experience"
@@ -37,10 +33,7 @@ export default function ExperiencesPage() {
         { key: 'title', label: 'Title' },
         { key: 'company', label: 'Company' },
         { key: 'period', label: 'Period' },
-        { key: 'isActive', label: 'Active' },
       ]}
-      onToggleActive={handleToggleActive}
-      getIsActive={(item) => item.isActive}
       renderForm={(item, onChange, data) => (
         <div className="space-y-4">
           <FormField label="Title" name="title" required>
@@ -91,72 +84,35 @@ export default function ExperiencesPage() {
             />
           </FormField>
 
-          {/* Job Descriptions */}
-          <div className="border-t border-gray-700 pt-4">
-            <h3 className="text-md font-semibold text-gray-200 mb-2">Job Descriptions</h3>
-            {(data.jobDescriptions || []).map((jd: any, index: number) => (
-              <div key={index} className="flex gap-2 mb-2 items-start">
-                <Textarea
-                  rows={2}
-                  className="flex-1"
-                  value={jd.description || jd}
-                  onChange={(e) => {
-                    const newJds = [...(data.jobDescriptions || [])]
-                    newJds[index] = { ...newJds[index], description: e.target.value, sortOrder: newJds[index]?.sortOrder ?? index }
-                    onChange({ ...data, jobDescriptions: newJds })
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newJds = (data.jobDescriptions || []).filter((_: any, i: number) => i !== index)
-                    onChange({ ...data, jobDescriptions: newJds })
-                  }}
-                  className="text-red-400 hover:text-red-300 px-2 py-1 text-xl"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => {
-                const newJds = [...(data.jobDescriptions || []), { description: '', sortOrder: (data.jobDescriptions || []).length }]
-                onChange({ ...data, jobDescriptions: newJds })
-              }}
-              className="text-sm text-blue-400 hover:text-blue-300"
-            >
-              + Add Description
-            </button>
-          </div>
-
           {/* Skills */}
           <div className="border-t border-gray-700 pt-4">
             <h3 className="text-md font-semibold text-gray-200 mb-2">Skills</h3>
-            {(data.skills || []).map((skill: any, index: number) => (
-              <div key={index} className="flex gap-2 mb-2 items-center">
-                <Input
-                  className="flex-1"
-                  value={skill.skill || skill}
-                  onChange={(e) => {
-                    const newSkills = [...(data.skills || [])]
-                    newSkills[index] = { ...newSkills[index], skill: e.target.value, sortOrder: newSkills[index]?.sortOrder ?? index }
-                    onChange({ ...data, skills: newSkills })
-                  }}
-                  placeholder="Skill name"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newSkills = (data.skills || []).filter((_: any, i: number) => i !== index)
-                    onChange({ ...data, skills: newSkills })
-                  }}
-                  className="text-red-400 hover:text-red-300 px-2 py-1 text-xl"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
+            <div className="flex flex-wrap gap-2 mb-2">
+              {(data.skills || []).map((skill: any, index: number) => (
+                <div key={index} className="inline-flex items-center gap-1 bg-gray-700 rounded px-2 py-1">
+                  <input
+                    className="bg-transparent text-gray-100 outline-none min-w-[60px] text-sm"
+                    value={skill.skill || skill}
+                    onChange={(e) => {
+                      const newSkills = [...(data.skills || [])]
+                      newSkills[index] = { ...newSkills[index], skill: e.target.value, sortOrder: newSkills[index]?.sortOrder ?? index }
+                      onChange({ ...data, skills: newSkills })
+                    }}
+                    placeholder="Skill name"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newSkills = (data.skills || []).filter((_: any, i: number) => i !== index)
+                      onChange({ ...data, skills: newSkills })
+                    }}
+                    className="text-red-400 hover:text-red-300 text-sm leading-none"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
             <button
               type="button"
               onClick={() => {

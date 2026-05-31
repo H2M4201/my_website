@@ -1,0 +1,96 @@
+version: "3.8"
+
+services:
+  # ===== Backend API =====
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+      target: ${DOCKER_TARGET:-production}
+    container_name: mywebsite-backend
+    ports:
+      - "4000:4000"
+    env_file:
+      - docker/.env.docker
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=4000
+      - FRONTEND_URLS=http://homepage:3000,http://adminPage:5000
+      - CORS_ORIGIN=http://localhost:3000,http://localhost:5000,http://homepage:3000,http://adminPage:5000
+    restart: unless-stopped
+    networks:
+      - mywebsite-network
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/src
+          target: /app/src
+        - action: sync
+          path: ./backend/prisma
+          target: /app/prisma
+        - action: rebuild
+          path: ./backend/package.json
+
+  # ===== Homepage (Public Website) =====
+  homepage:
+    build:
+      context: .
+      dockerfile: docker/homepage.Dockerfile
+      target: ${DOCKER_TARGET:-production}
+    container_name: mywebsite-homepage
+    ports:
+      - "3000:3000"
+    env_file:
+      - docker/.env.docker
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3000
+      - API_URL=http://backend:4000
+      - NEXT_PUBLIC_API_URL=http://localhost:4000
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - mywebsite-network
+    develop:
+      watch:
+        - action: sync
+          path: ./homepage
+          target: /app
+          ignore:
+            - node_modules/
+            - .next/
+
+  # ===== Admin Dashboard =====
+  admin-page:
+    build:
+      context: .
+      dockerfile: docker/adminPage.Dockerfile
+      target: ${DOCKER_TARGET:-production}
+    container_name: mywebsite-admin
+    ports:
+      - "5000:5000"
+    env_file:
+      - docker/.env.docker
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=5000
+      - API_URL=http://backend:4000
+      - NEXT_PUBLIC_API_URL=http://localhost:4000
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - mywebsite-network
+    develop:
+      watch:
+        - action: sync
+          path: ./adminPage
+          target: /app
+          ignore:
+            - node_modules/
+            - .next/
+
+networks:
+  mywebsite-network:
+    driver: bridge

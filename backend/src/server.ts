@@ -5,11 +5,9 @@ import path from 'path'
 import { execSync } from 'child_process'
 import 'dotenv/config'
 import { createApp } from './app'
-import { fileURLToPath } from 'url'
 
-// ESM compatibility
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+// __dirname is available as a global in CommonJS
+// Using it directly to compute paths
 
 const port = Number(process.env.PORT || 4000)
 const hostname = 'localhost'

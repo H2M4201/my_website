@@ -49,30 +49,32 @@ export default function ExpertisePage() {
           {/* Skills */}
           <div className="border-t border-gray-700 pt-4">
             <h3 className="text-md font-semibold text-gray-200 mb-2">Skills</h3>
-            {(data.skills || []).map((skill: any, index: number) => (
-              <div key={index} className="flex gap-2 mb-2 items-center">
-                <Input
-                  className="flex-1"
-                  value={skill.skill || skill}
-                  onChange={(e) => {
-                    const newSkills = [...(data.skills || [])]
-                    newSkills[index] = { ...newSkills[index], skill: e.target.value, sortOrder: newSkills[index]?.sortOrder ?? index }
-                    onChange({ ...data, skills: newSkills })
-                  }}
-                  placeholder="Skill name"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newSkills = (data.skills || []).filter((_: any, i: number) => i !== index)
-                    onChange({ ...data, skills: newSkills })
-                  }}
-                  className="text-red-400 hover:text-red-300 px-2 py-1 text-xl"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
+            <div className="flex flex-wrap gap-2 mb-2">
+              {(data.skills || []).map((skill: any, index: number) => (
+                <div key={index} className="inline-flex items-center gap-1 bg-gray-700 rounded px-2 py-1">
+                  <input
+                    className="bg-transparent text-gray-100 outline-none min-w-[60px] text-sm"
+                    value={skill.skill || skill}
+                    onChange={(e) => {
+                      const newSkills = [...(data.skills || [])]
+                      newSkills[index] = { ...newSkills[index], skill: e.target.value, sortOrder: newSkills[index]?.sortOrder ?? index }
+                      onChange({ ...data, skills: newSkills })
+                    }}
+                    placeholder="Skill name"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newSkills = (data.skills || []).filter((_: any, i: number) => i !== index)
+                      onChange({ ...data, skills: newSkills })
+                    }}
+                    className="text-red-400 hover:text-red-300 text-sm leading-none"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
             <button
               type="button"
               onClick={() => {

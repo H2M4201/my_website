@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Table, Modal, FormField, Input, Textarea } from '@/components'
-import { useFetchAll, deleteItem, updateItem } from '@/hooks/useApi'
+import { useFetchAll, deleteItem } from '@/hooks/useApi'
 import { ResourceType } from '@/types'
 
 interface CrudTemplateProps {
@@ -60,17 +60,6 @@ export function CrudTemplate({
     }
   }
 
-  const handleToggleActive = async (item: any) => {
-    if (onToggleActive) {
-      try {
-        await onToggleActive(item)
-        mutate()
-      } catch (err: any) {
-        setError(err.message || 'Failed to toggle active status')
-      }
-    }
-  }
-
   const handleSubmit = async () => {
     try {
       setIsSaving(true)
@@ -114,9 +103,10 @@ export function CrudTemplate({
       <Table
         data={items}
         columns={tableColumns}
+        resource={resource}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        onToggleActive={onToggleActive ? handleToggleActive : undefined}
+        onToggleActive={onToggleActive}
         getIsActive={getIsActive}
         isLoading={isLoading}
       />

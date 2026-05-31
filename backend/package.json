@@ -11,7 +11,11 @@
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "prisma:generate": "prisma generate",
+    "prisma:generate:local": "node scripts/switch-prisma.js sqlserver && prisma generate && node scripts/switch-prisma.js postgresql",
+    "prisma:generate:docker": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:local": "node scripts/switch-prisma.js sqlserver && prisma migrate dev && node scripts/switch-prisma.js postgresql",
+    "prisma:migrate:docker": "prisma migrate dev",
     "prisma:seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
