@@ -11,12 +11,18 @@ function mapSectionToDTO(section: {
   SectionName: string
   Description: string | null
   Href: string | null
+  IsActive: boolean
+  createdAt: Date
+  updatedAt: Date
 }): SectionDTO {
   return {
     id: section.id,
     title: section.SectionName,
     description: section.Description,
     href: section.Href,
+    isActive: section.IsActive,
+    createdAt: section.createdAt,
+    updatedAt: section.updatedAt,
   }
 }
 
@@ -59,6 +65,7 @@ export async function createSection(
         SectionName: data.title,
         Description: data.description || null,
         Href: data.href || null,
+        IsActive: data.isActive ?? true,
       },
     })
     return mapSectionToDTO(section)
@@ -88,6 +95,7 @@ export async function updateSection(
         Description:
           data.description !== undefined ? data.description : section.Description,
         Href: data.href !== undefined ? data.href : section.Href,
+        IsActive: data.isActive !== undefined ? data.isActive : section.IsActive,
       },
     })
 

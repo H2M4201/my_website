@@ -2,16 +2,19 @@ export interface RecipeDTO {
   id: number
   name: string
   description: string | null
+  isActive: boolean
 }
 
 export interface CreateRecipeDTO {
   name: string
   description?: string | null
+  isActive?: boolean
 }
 
 export interface UpdateRecipeDTO {
   name?: string
   description?: string | null
+  isActive?: boolean
 }
 
 export class RecipeNotFoundError extends Error {

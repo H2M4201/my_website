@@ -4,6 +4,7 @@ export interface TripDTO {
   time: string | null
   location: string | null
   content: string | null
+  isActive: boolean
 }
 
 export interface CreateTripDTO {
@@ -11,6 +12,7 @@ export interface CreateTripDTO {
   time?: string | null
   location?: string | null
   content?: string | null
+  isActive?: boolean
 }
 
 export interface UpdateTripDTO {
@@ -18,6 +20,7 @@ export interface UpdateTripDTO {
   time?: string | null
   location?: string | null
   content?: string | null
+  isActive?: boolean
 }
 
 export class TripNotFoundError extends Error {

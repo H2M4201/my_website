@@ -11,6 +11,14 @@ interface ModalProps {
   onSubmit?: () => void
   submitLabel?: string
   isLoading?: boolean
+  size?: 'md' | 'lg' | 'xl' | 'full'
+}
+
+const sizeClasses = {
+  md: 'max-w-2xl',
+  lg: 'max-w-4xl',
+  xl: 'max-w-6xl',
+  full: 'max-w-[95vw]',
 }
 
 export function Modal({
@@ -21,12 +29,13 @@ export function Modal({
   onSubmit,
   submitLabel = 'Submit',
   isLoading = false,
+  size = 'md',
 }: ModalProps) {
   if (!isOpen) return null
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
+      <div className={`modal-content ${sizeClasses[size]}`}>
         <div className="modal-header">
           <h2 className="text-lg font-semibold text-gray-100">{title}</h2>
           <button

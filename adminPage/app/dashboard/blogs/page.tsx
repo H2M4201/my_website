@@ -2,6 +2,7 @@
 
 import { CrudTemplate } from '@/components/CrudTemplate'
 import { FormField, Input, Textarea } from '@/components'
+import { BlogEditor } from '@/components'
 import { createItem, updateItem } from '@/hooks/useApi'
 import { Blog } from '@/types'
 
@@ -22,6 +23,7 @@ export default function BlogsPage() {
         { key: 'title', label: 'Title' },
         { key: 'description', label: 'Description' },
       ]}
+      modalSize="xl"
       renderForm={(item, onChange, data) => (
         <div className="space-y-4">
           <FormField label="Title" name="title" required>
@@ -39,11 +41,11 @@ export default function BlogsPage() {
             />
           </FormField>
           <FormField label="Content" name="content">
-            <Textarea
-              name="content"
-              rows={8}
+            <BlogEditor
               value={data.content || ''}
-              onChange={(e) => onChange({ ...data, content: e.target.value })}
+              onChange={(html) => onChange({ ...data, content: html })}
+              minHeight={300}
+              placeholder="Start writing your blog content..."
             />
           </FormField>
         </div>

@@ -100,6 +100,54 @@ body {
     @apply bg-blue-900/30 border-blue-800;
   }
 
+  /* Blog Editor */
+  .blog-editor-content h1 {
+    @apply text-2xl font-bold text-gray-100 mb-4 mt-6;
+  }
+  .blog-editor-content h2 {
+    @apply text-xl font-bold text-gray-100 mb-3 mt-5;
+  }
+  .blog-editor-content p {
+    @apply mb-3 leading-relaxed;
+  }
+  .blog-editor-content ul,
+  .blog-editor-content ol {
+    @apply mb-3 pl-6;
+  }
+  .blog-editor-content ul {
+    @apply list-disc;
+  }
+  .blog-editor-content ol {
+    @apply list-decimal;
+  }
+  .blog-editor-content li {
+    @apply mb-1;
+  }
+  .blog-editor-content blockquote {
+    @apply border-l-4 border-blue-500 pl-4 italic text-gray-400 mb-3;
+  }
+  .blog-editor-content pre {
+    @apply bg-gray-900 text-gray-200 p-4 rounded-lg overflow-x-auto mb-3 text-sm font-mono;
+  }
+  .blog-editor-content code {
+    @apply bg-gray-900 text-pink-300 px-1.5 py-0.5 rounded text-sm font-mono;
+  }
+  .blog-editor-content img {
+    @apply max-w-full h-auto rounded-lg my-4 mx-auto block;
+  }
+  .blog-editor-content a {
+    @apply text-blue-400 hover:text-blue-300 underline;
+  }
+  .blog-editor-content [style*="text-align: center"] img {
+    @apply mx-auto;
+  }
+
+  /* Placeholder for contentEditable */
+  .blog-editor-content div[contenteditable]:empty:before {
+    content: attr(data-placeholder);
+    @apply text-gray-500;
+  }
+
   /* Error / success alerts */
   .alert-error {
     @apply p-4 bg-red-900/50 text-red-300 rounded-lg border border-red-800;

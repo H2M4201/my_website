@@ -46,7 +46,7 @@ export function Table<T extends { id: number }>({
 
   // Auto-detect if items have an isActive field
   const hasIsActiveField = data.some((item) => 'isActive' in item)
-  const isActiveInColumns = columns.some((col) => col.key === 'isActive')
+  const isActiveInColumns = columns.some((col) => col.key === 'IsActive')
   const effectiveGetIsActive = getIsActive || ((item: any) => item.isActive)
 
   // Default toggle handler: uses resource to make the API call automatically

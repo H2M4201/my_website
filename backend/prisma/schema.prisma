@@ -1,20 +1,12 @@
 // ============================================
-// Prisma Schema - Multi-Provider Support
+// Prisma Schema - SQL Server (Local Development)
 // ============================================
-// Local development (SQL Server):
-//   Set DATABASE_URL in backend/.env to your SQL Server connection string
-//   Provider: sqlserver
-//
-// Docker / Supabase (PostgreSQL):
-//   Set SUPABASE_DATABASE_URL in docker/.env.docker
-//   Provider: postgresql
-//
-// The provider is selected at Prisma generation time via the
-// DATABASE_PROVIDER env var (defaults to "sqlserver" for local dev).
+// This file is used for local development with SQL Server.
+// To use it, run: npm run prisma:generate:local
 // ============================================
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlserver"
   url      = env("DATABASE_URL")
 }
 
@@ -23,56 +15,82 @@ generator client {
 }
 
 model Section {
-  id          Int     @id @default(autoincrement())
-  SectionName String
-  Description String?
-  Href        String?
+  id          Int      @id @default(autoincrement())
+  SectionName String   @db.NVarChar(100)
+  Description String?  @db.NVarChar(500)
+  Href        String?  @db.NVarChar(255)
+  IsActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("Section")
 }
 
 model Contact {
-  id          Int     @id @default(autoincrement())
-  ContactType String
-  ContactInfo String
-  Icon        String?
+  id          Int      @id @default(autoincrement())
+  ContactType String   @db.NVarChar(50)
+  ContactInfo String   @db.NVarChar(255)
+  Icon        String?  @db.NVarChar(100)
+  IsActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("Contact")
 }
 
 model Blog {
-  id          Int     @id @default(autoincrement())
-  Title       String
-  Description String?
-  Content     String?
+  id          Int      @id @default(autoincrement())
+  Title       String   @db.NVarChar(255)
+  Description String?  @db.NVarChar(1000)
+  Content     String?  @db.NVarChar(max)
+  IsActive    Boolean  @default(true)
+  SortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("Blog")
 }
 
+model BlogCategory {
+  id           Int      @id @default(autoincrement())
+  CategoryName String   @db.NVarChar(255)
+  SortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("BlogCategory")
+}
+
 model Trip {
-  id        Int     @id @default(autoincrement())
-  Title     String
-  Time      String?
-  Location  String?
-  Content   String?
+  id        Int      @id @default(autoincrement())
+  Title     String   @db.NVarChar(255)
+  Time      String?  @db.NVarChar(100)
+  Location  String?  @db.NVarChar(255)
+  Content   String?  @db.NVarChar(max)
+  IsActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("Trip")
 }
 
 model Recipe {
-  id          Int     @id @default(autoincrement())
-  Name        String
-  Description String?
+  id          Int      @id @default(autoincrement())
+  Name        String   @db.NVarChar(255)
+  Description String?  @db.NVarChar(1000)
+  IsActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("Recipe")
 }
 
 model Experience {
   id          Int      @id @default(autoincrement())
-  Title       String
-  Company     String
-  Period      String
-  Achievement String?
+  Title       String   @db.NVarChar(255)
+  Company     String   @db.NVarChar(255)
+  Period      String   @db.NVarChar(100)
+  Achievement String?  @db.NVarChar(1000)
   IsActive    Boolean  @default(true)
   SortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
@@ -85,10 +103,13 @@ model Experience {
 }
 
 model JobDescription {
-  id           Int    @id @default(autoincrement())
-  Description  String
-  SortOrder    Int    @default(0)
+  id           Int      @id @default(autoincrement())
+  Description  String   @db.NVarChar(1000)
+  SortOrder    Int      @default(0)
   experienceId Int
+  IsActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
 
@@ -97,7 +118,7 @@ model JobDescription {
 
 model ExperienceSkill {
   id           Int    @id @default(autoincrement())
-  Skill        String
+  Skill        String @db.NVarChar(100)
   SortOrder    Int    @default(0)
   experienceId Int
 
@@ -108,8 +129,9 @@ model ExperienceSkill {
 
 model ExpertiseCategory {
   id          Int      @id @default(autoincrement())
-  Category    String
+  Category    String   @db.NVarChar(100)
   SortOrder   Int      @default(0)
+  IsActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -119,10 +141,13 @@ model ExpertiseCategory {
 }
 
 model ExpertiseSkill {
-  id                 Int    @id @default(autoincrement())
-  Skill              String
-  SortOrder          Int    @default(0)
+  id                 Int      @id @default(autoincrement())
+  Skill              String   @db.NVarChar(100)
+  SortOrder          Int      @default(0)
   expertiseCategoryId Int
+  IsActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   category ExpertiseCategory @relation(fields: [expertiseCategoryId], references: [id], onDelete: Cascade)
 
@@ -131,15 +156,15 @@ model ExpertiseSkill {
 
 model AdminUser {
   id                    Int       @id @default(autoincrement())
-  username              String    @unique
-  password              String
-  email                 String?
-  name                  String?
+  username              String    @unique @db.NVarChar(100)
+  password              String    @db.NVarChar(255)
+  email                 String?   @db.NVarChar(255)
+  name                  String?   @db.NVarChar(255)
   roleId                Int?
   failedLoginAttempts   Int       @default(0)
   lockedUntil           DateTime?
   passwordChangedAt     DateTime?
-  passwordResetToken    String?
+  passwordResetToken    String?   @db.NVarChar(255)
   passwordResetTokenExpires DateTime?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt

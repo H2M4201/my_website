@@ -8,12 +8,14 @@ export const createSectionRequestSchema = z.object({
   title: z.string().min(1).max(100),
   description: z.string().nullable().optional(),
   href: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
 })
 
 export const updateSectionRequestSchema = z.object({
   title: z.string().min(1).max(100).optional(),
   description: z.string().nullable().optional(),
   href: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
 })
 
 export const sectionResponseSchema = z.object({
@@ -21,6 +23,7 @@ export const sectionResponseSchema = z.object({
   title: z.string(),
   description: z.string().nullable(),
   href: z.string().nullable(),
+  isActive: z.boolean(),
 })
 
 export const sectionsListResponseSchema = z.array(sectionResponseSchema)
@@ -33,12 +36,14 @@ export const createContactRequestSchema = z.object({
   type: z.string().min(1).max(50),
   info: z.string().min(1).max(255),
   icon: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
 })
 
 export const updateContactRequestSchema = z.object({
   type: z.string().min(1).max(50).optional(),
   info: z.string().min(1).max(255).optional(),
   icon: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
 })
 
 export const contactResponseSchema = z.object({
@@ -46,6 +51,7 @@ export const contactResponseSchema = z.object({
   type: z.string(),
   info: z.string(),
   icon: z.string().nullable(),
+  isActive: z.boolean(),
 })
 
 export const contactsListResponseSchema = z.array(contactResponseSchema)
@@ -58,12 +64,14 @@ export const createBlogRequestSchema = z.object({
   title: z.string().min(1).max(255),
   description: z.string().nullable().optional(),
   content: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
 })
 
 export const updateBlogRequestSchema = z.object({
   title: z.string().min(1).max(255).optional(),
   description: z.string().nullable().optional(),
   content: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
 })
 
 export const blogResponseSchema = z.object({
@@ -71,6 +79,7 @@ export const blogResponseSchema = z.object({
   title: z.string(),
   description: z.string().nullable(),
   content: z.string().nullable(),
+  isActive: z.boolean(),
 })
 
 export const blogsListResponseSchema = z.array(blogResponseSchema)
@@ -84,6 +93,7 @@ export const createTripRequestSchema = z.object({
   time: z.string().nullable().optional(),
   location: z.string().nullable().optional(),
   content: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
 })
 
 export const updateTripRequestSchema = z.object({
@@ -91,6 +101,7 @@ export const updateTripRequestSchema = z.object({
   time: z.string().nullable().optional(),
   location: z.string().nullable().optional(),
   content: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
 })
 
 export const tripResponseSchema = z.object({
@@ -99,6 +110,7 @@ export const tripResponseSchema = z.object({
   time: z.string().nullable(),
   location: z.string().nullable(),
   content: z.string().nullable(),
+  isActive: z.boolean(),
 })
 
 export const tripsListResponseSchema = z.array(tripResponseSchema)
@@ -110,17 +122,20 @@ export const recipeIdParamSchema = z.coerce.number().positive()
 export const createRecipeRequestSchema = z.object({
   name: z.string().min(1).max(255),
   description: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
 })
 
 export const updateRecipeRequestSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   description: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
 })
 
 export const recipeResponseSchema = z.object({
   id: z.number(),
   name: z.string(),
   description: z.string().nullable(),
+  isActive: z.boolean(),
 })
 
 export const recipesListResponseSchema = z.array(recipeResponseSchema)
@@ -201,12 +216,14 @@ const createExpertiseSkillSchema = z.object({
 export const createExpertiseCategoryRequestSchema = z.object({
   category: z.string().min(1).max(100),
   sortOrder: z.number().int().optional(),
+  isActive: z.boolean().optional(),
   skills: z.array(createExpertiseSkillSchema).optional(),
 })
 
 export const updateExpertiseCategoryRequestSchema = z.object({
   category: z.string().min(1).max(100).optional(),
   sortOrder: z.number().int().optional(),
+  isActive: z.boolean().optional(),
   skills: z.array(createExpertiseSkillSchema).optional(),
 })
 
@@ -221,6 +238,7 @@ export const expertiseCategoryResponseSchema = z.object({
   id: z.number(),
   category: z.string(),
   sortOrder: z.number(),
+  isActive: z.boolean(),
   skills: z.array(expertiseSkillResponseSchema),
 })
 

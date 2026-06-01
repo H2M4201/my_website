@@ -64,18 +64,21 @@ export interface ExpertiseCategoryDTO {
   id: number
   category: string
   sortOrder: number
+  isActive: boolean
   skills: ExpertiseSkillDTO[]
 }
 
 export interface CreateExpertiseCategoryDTO {
   category: string
   sortOrder?: number
+  isActive?: boolean
   skills?: CreateExpertiseSkillDTO[]
 }
 
 export interface UpdateExpertiseCategoryDTO {
   category?: string
   sortOrder?: number
+  isActive?: boolean
   skills?: CreateExpertiseSkillDTO[]
 }
 
@@ -85,6 +88,7 @@ export interface ExpertiseSkillDTO {
   skill: string
   sortOrder: number
   expertiseCategoryId: number
+  isActive: boolean
 }
 
 export interface CreateExpertiseSkillDTO {

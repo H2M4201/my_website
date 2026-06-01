@@ -15,46 +15,72 @@ generator client {
 }
 
 model Section {
-  id          Int     @id @default(autoincrement())
-  SectionName String  @db.NVarChar(100)
-  Description String? @db.NVarChar(500)
-  Href        String? @db.NVarChar(255)
+  id          Int      @id @default(autoincrement())
+  SectionName String   @db.NVarChar(100)
+  Description String?  @db.NVarChar(500)
+  Href        String?  @db.NVarChar(255)
+  IsActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("Section")
 }
 
 model Contact {
-  id          Int     @id @default(autoincrement())
-  ContactType String  @db.NVarChar(50)
-  ContactInfo String  @db.NVarChar(255)
-  Icon        String? @db.NVarChar(100)
+  id          Int      @id @default(autoincrement())
+  ContactType String   @db.NVarChar(50)
+  ContactInfo String   @db.NVarChar(255)
+  Icon        String?  @db.NVarChar(100)
+  IsActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("Contact")
 }
 
 model Blog {
-  id          Int     @id @default(autoincrement())
-  Title       String  @db.NVarChar(255)
-  Description String? @db.NVarChar(1000)
-  Content     String? @db.NVarChar(max)
+  id          Int      @id @default(autoincrement())
+  Title       String   @db.NVarChar(255)
+  Description String?  @db.NVarChar(1000)
+  Content     String?  @db.NVarChar(max)
+  IsActive    Boolean  @default(true)
+  SortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("Blog")
 }
 
+model BlogCategory {
+  id           Int      @id @default(autoincrement())
+  CategoryName String   @db.NVarChar(255)
+  SortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("BlogCategory")
+}
+
 model Trip {
-  id        Int     @id @default(autoincrement())
-  Title     String  @db.NVarChar(255)
-  Time      String? @db.NVarChar(100)
-  Location  String? @db.NVarChar(255)
-  Content   String? @db.NVarChar(max)
+  id        Int      @id @default(autoincrement())
+  Title     String   @db.NVarChar(255)
+  Time      String?  @db.NVarChar(100)
+  Location  String?  @db.NVarChar(255)
+  Content   String?  @db.NVarChar(max)
+  IsActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("Trip")
 }
 
 model Recipe {
-  id          Int     @id @default(autoincrement())
-  Name        String  @db.NVarChar(255)
-  Description String? @db.NVarChar(1000)
+  id          Int      @id @default(autoincrement())
+  Name        String   @db.NVarChar(255)
+  Description String?  @db.NVarChar(1000)
+  IsActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("Recipe")
 }
@@ -77,10 +103,13 @@ model Experience {
 }
 
 model JobDescription {
-  id           Int    @id @default(autoincrement())
-  Description  String @db.NVarChar(1000)
-  SortOrder    Int    @default(0)
+  id           Int      @id @default(autoincrement())
+  Description  String   @db.NVarChar(1000)
+  SortOrder    Int      @default(0)
   experienceId Int
+  IsActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
 
@@ -102,6 +131,7 @@ model ExpertiseCategory {
   id          Int      @id @default(autoincrement())
   Category    String   @db.NVarChar(100)
   SortOrder   Int      @default(0)
+  IsActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -111,10 +141,13 @@ model ExpertiseCategory {
 }
 
 model ExpertiseSkill {
-  id                 Int    @id @default(autoincrement())
-  Skill              String @db.NVarChar(100)
-  SortOrder          Int    @default(0)
+  id                 Int      @id @default(autoincrement())
+  Skill              String   @db.NVarChar(100)
+  SortOrder          Int      @default(0)
   expertiseCategoryId Int
+  IsActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   category ExpertiseCategory @relation(fields: [expertiseCategoryId], references: [id], onDelete: Cascade)
 

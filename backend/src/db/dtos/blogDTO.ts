@@ -3,18 +3,21 @@ export interface BlogDTO {
   title: string
   description: string | null
   content: string | null
+  isActive: boolean
 }
 
 export interface CreateBlogDTO {
   title: string
   description?: string | null
   content?: string | null
+  isActive?: boolean
 }
 
 export interface UpdateBlogDTO {
   title?: string
   description?: string | null
   content?: string | null
+  isActive?: boolean
 }
 
 export class BlogNotFoundError extends Error {

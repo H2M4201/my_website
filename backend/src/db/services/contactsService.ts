@@ -11,12 +11,14 @@ function mapContactToDTO(contact: {
   ContactType: string
   ContactInfo: string
   Icon: string | null
+  IsActive: boolean
 }): ContactDTO {
   return {
     id: contact.id,
     type: contact.ContactType,
     info: contact.ContactInfo,
     icon: contact.Icon,
+    isActive: contact.IsActive,
   }
 }
 
@@ -59,6 +61,7 @@ export async function createContact(
         ContactType: data.type,
         ContactInfo: data.info,
         Icon: data.icon || null,
+        IsActive: data.isActive ?? true,
       },
     })
     return mapContactToDTO(contact)
@@ -89,6 +92,7 @@ export async function updateContact(
         ContactInfo:
           data.info !== undefined ? data.info : contact.ContactInfo,
         Icon: data.icon !== undefined ? data.icon : contact.Icon,
+        IsActive: data.isActive !== undefined ? data.isActive : contact.IsActive,
       },
     })
 

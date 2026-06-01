@@ -17,6 +17,9 @@ export interface Section {
   title: string
   description: string | null
   href: string | null
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Contact {
@@ -24,6 +27,9 @@ export interface Contact {
   type: string
   info: string
   icon: string | null
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Blog {
@@ -39,12 +45,18 @@ export interface Trip {
   time: string | null
   location: string | null
   content: string | null
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Recipe {
   id: number
   name: string
   description: string | null
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Resume {
@@ -58,6 +70,9 @@ export interface JobDescription {
   description: string
   sortOrder: number
   experienceId: number
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface ExperienceSkill {
@@ -84,12 +99,18 @@ export interface ExpertiseSkill {
   skill: string
   sortOrder: number
   expertiseCategoryId: number
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface ExpertiseCategory {
   id: number
   category: string
   sortOrder: number
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
   skills: ExpertiseSkill[]
 }
 

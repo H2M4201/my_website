@@ -1,7 +1,8 @@
 'use client'
 
 import { CrudTemplate } from '@/components/CrudTemplate'
-import { FormField, Input, Textarea } from '@/components'
+import { FormField, Input } from '@/components'
+import { BlogEditor } from '@/components'
 import { createItem, updateItem } from '@/hooks/useApi'
 import { Trip } from '@/types'
 
@@ -23,6 +24,7 @@ export default function TripsPage() {
         { key: 'location', label: 'Location' },
         { key: 'time', label: 'Time' },
       ]}
+      modalSize="xl"
       renderForm={(item, onChange, data) => (
         <div className="space-y-4">
           <FormField label="Title" name="title" required>
@@ -47,11 +49,11 @@ export default function TripsPage() {
             />
           </FormField>
           <FormField label="Content" name="content">
-            <Textarea
-              name="content"
-              rows={8}
+            <BlogEditor
               value={data.content || ''}
-              onChange={(e) => onChange({ ...data, content: e.target.value })}
+              onChange={(html) => onChange({ ...data, content: html })}
+              minHeight={300}
+              placeholder="Start writing your trip content..."
             />
           </FormField>
         </div>

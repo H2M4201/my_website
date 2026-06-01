@@ -17,8 +17,8 @@ COPY homepage/ .
 
 EXPOSE 3000
 
-# Run Next.js in dev mode with hot reload
-CMD ["npm", "run", "dev"]
+# Run with HTTPS via custom server.js
+CMD ["npm", "run", "dev:ssl"]
 
 # ---- Production Build ----
 FROM base AS build
@@ -36,13 +36,19 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# Install OpenSSL for self-signed certificate generation on startup
+RUN apk add --no-cache openssl
+
 # Copy built artifacts
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package*.json ./
 COPY --from=build /app/next.config.js ./
 
+# Copy server.js for HTTPS serving
+COPY --from=build /app/server.js ./server.js
+
 EXPOSE 3000
 
-# Start Next.js
-CMD ["npm", "run", "start"]
+# Start with HTTPS via custom server.js
+CMD ["node", "server.js"]

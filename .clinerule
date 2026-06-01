@@ -6,4 +6,66 @@
 
 4. When being asked to explain something, only generate the answer without modifying any code or running any command.
 
-5. role: you are a senior web full stack engineer who have 20 years of experience building production-ready and high security website.
+5. When a user requests a code modification that involves multiple layers of the stack, follow this workflow in order. Skip any step not required by the user prompt.
+
+   ```
+   Step 1:  Modify Frontend Layout
+            Files: homepage/app/**, homepage/components/**, adminPage/app/**, adminPage/components/**
+            (UI changes only — pages, components, styling)
+
+   Step 2:  Update Frontend Types & API Hooks
+            Files: adminPage/types/index.ts, adminPage/hooks/**, adminPage/store/**
+            (Define or update TypeScript interfaces matching new data shapes)
+
+   Step 3:  Update DB Schema
+            Files: backend/prisma/schema.prisma, backend/prisma/schema.sqlserver.prisma
+            (Add/modify Prisma models, run migrations)
+
+   Step 3b: Migrate Existing Data
+            (After schema migration, write and run a data migration script that preserves all existing rows.
+             For new columns with defaults, use UPDATE statements to backfill old records.
+             Never DROP/CREATE tables — use ALTER TABLE ADD columns with defaults so no data is lost.
+             Verify row counts match before/after migration.)
+            Files: backend/scripts/data-migrations/**
+            (One-time migration scripts for transforming existing data into new schema shape)
+
+   Step 4:  Update Backend DTOs
+            Files: backend/src/db/dtos/**
+            (Define data transfer objects that map between DB and API layer)
+
+   Step 5:  Update Backend Business Logic & Services
+            Files: backend/src/db/services/**
+            (Implement CRUD logic, validation, transformations)
+
+   Step 6:  Write Backend Tests (for modified services)
+            Files: backend/src/**/*.test.ts, backend/src/**/*.spec.ts
+            (Unit tests for services, integration tests for database queries)
+
+   Step 7:  Update Backend API Routes & Schemas
+            Files: backend/src/api/routes/**, backend/src/api/schemas/**
+            (Define/update routes, request validation schemas, response types)
+
+   Step 8:  Write Backend API Tests (for modified routes)
+            Files: backend/src/api/**/*.test.ts, backend/src/tests/**
+            (Integration tests for API endpoints — request/response, auth, error handling)
+
+   Step 9:  Wire Frontend to API
+            Files: adminPage/app/**/page.tsx, adminPage/app/**/*.tsx, homepage/lib/**
+            (Connect frontend components to the updated API endpoints)
+
+   Step 10: Write Frontend Tests (for modified components/pages)
+            Files: adminPage/**/*.test.ts, adminPage/**/*.spec.ts,
+                   homepage/**/*.test.ts, homepage/**/*.spec.ts
+            (Component rendering, hook behavior, page smoke tests with mocked API)
+
+   Step 11: Update Config Files
+            Files: .env.local, docker/.env.docker, backend/.env, etc.
+            (Environment variables, API URLs, feature flags)
+
+   Step 12: Update Deployment Config
+            Files: docker/*.Dockerfile, docker-compose.yml, CI/CD configs
+            (Docker, infrastructure, pipeline changes)
+   ```
+
+   Constraint: If a step is not required in the user prompt, skip it.
+   Test steps (6, 8, 10) are only run when the user explicitly asks for testing (e.g., "add tests", "test it", "make sure it works") or when modifying critical business logic that could break existing functionality.

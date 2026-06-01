@@ -17,6 +17,9 @@ interface CrudTemplateProps {
   onSave: (data: any, id?: number) => Promise<void>
   onToggleActive?: (item: any) => Promise<void>
   getIsActive?: (item: any) => boolean
+  modalSize?: 'md' | 'lg' | 'xl' | 'full'
+  /** Set to false to hide the default Active checkbox in the form */
+  showActiveField?: boolean
 }
 
 export function CrudTemplate({
@@ -27,6 +30,8 @@ export function CrudTemplate({
   onSave,
   onToggleActive,
   getIsActive,
+  modalSize = 'md',
+  showActiveField = true,
 }: CrudTemplateProps) {
   const { items, isLoading, mutate } = useFetchAll(resource)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -122,8 +127,22 @@ export function CrudTemplate({
         onSubmit={handleSubmit}
         submitLabel={selectedItem ? 'Update' : 'Create'}
         isLoading={isSaving}
+        size={modalSize}
       >
         {renderForm(selectedItem, setFormData, formData)}
+
+        {showActiveField && (
+          <div className="flex items-center gap-2 pt-4 border-t border-gray-700 mt-4">
+            <input
+              type="checkbox"
+              id="isActive"
+              checked={formData.isActive ?? true}
+              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+              className="w-4 h-4 accent-blue-500"
+            />
+            <label htmlFor="isActive" className="text-sm font-medium text-gray-300">Active</label>
+          </div>
+        )}
       </Modal>
     </div>
   )

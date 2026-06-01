@@ -10,11 +10,13 @@ function mapRecipeToDTO(recipe: {
   id: number
   Name: string
   Description: string | null
+  IsActive: boolean
 }): RecipeDTO {
   return {
     id: recipe.id,
     name: recipe.Name,
     description: recipe.Description,
+    isActive: recipe.IsActive,
   }
 }
 
@@ -54,6 +56,7 @@ export async function createRecipe(data: CreateRecipeDTO): Promise<RecipeDTO> {
       data: {
         Name: data.name,
         Description: data.description || null,
+        IsActive: data.isActive ?? true,
       },
     })
     return mapRecipeToDTO(recipe)
@@ -84,6 +87,7 @@ export async function updateRecipe(
           data.description !== undefined
             ? data.description
             : recipe.Description,
+        IsActive: data.isActive !== undefined ? data.isActive : recipe.IsActive,
       },
     })
 

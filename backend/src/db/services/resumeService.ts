@@ -205,11 +205,13 @@ function mapExpertiseCategory(cat: any): ExpertiseCategoryDTO {
     id: cat.id,
     category: cat.Category,
     sortOrder: cat.SortOrder,
+    isActive: cat.IsActive,
     skills: (cat.skills || []).map((s: any) => ({
       id: s.id,
       skill: s.Skill,
       sortOrder: s.SortOrder,
       expertiseCategoryId: s.expertiseCategoryId,
+      isActive: s.IsActive ?? true,
     })),
   }
 }
@@ -254,6 +256,7 @@ export async function createExpertiseCategory(data: CreateExpertiseCategoryDTO):
       data: {
         Category: data.category,
         SortOrder: data.sortOrder ?? 0,
+        IsActive: data.isActive ?? true,
         skills: data.skills
           ? {
               create: data.skills.map((s, i) => ({
@@ -290,6 +293,7 @@ export async function updateExpertiseCategory(id: number, data: UpdateExpertiseC
       data: {
         Category: data.category !== undefined ? data.category : existing.Category,
         SortOrder: data.sortOrder !== undefined ? data.sortOrder : existing.SortOrder,
+        IsActive: data.isActive !== undefined ? data.isActive : existing.IsActive,
         skills: data.skills
           ? {
               create: data.skills.map((s, i) => ({

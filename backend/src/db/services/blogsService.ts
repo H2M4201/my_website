@@ -6,12 +6,14 @@ function mapBlogToDTO(blog: {
   Title: string
   Description: string | null
   Content: string | null
+  IsActive: boolean
 }): BlogDTO {
   return {
     id: blog.id,
     title: blog.Title,
     description: blog.Description,
     content: blog.Content,
+    isActive: blog.IsActive,
   }
 }
 
@@ -52,6 +54,7 @@ export async function createBlog(data: CreateBlogDTO): Promise<BlogDTO> {
         Title: data.title,
         Description: data.description || null,
         Content: data.content || null,
+        IsActive: data.isActive ?? true,
       },
     })
     return mapBlogToDTO(blog)
@@ -81,6 +84,7 @@ export async function updateBlog(
         Description:
           data.description !== undefined ? data.description : blog.Description,
         Content: data.content !== undefined ? data.content : blog.Content,
+        IsActive: data.isActive !== undefined ? data.isActive : blog.IsActive,
       },
     })
 

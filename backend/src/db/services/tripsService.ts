@@ -7,6 +7,7 @@ function mapTripToDTO(trip: {
   Time: string | null
   Location: string | null
   Content: string | null
+  IsActive: boolean
 }): TripDTO {
   return {
     id: trip.id,
@@ -14,6 +15,7 @@ function mapTripToDTO(trip: {
     time: trip.Time,
     location: trip.Location,
     content: trip.Content,
+    isActive: trip.IsActive,
   }
 }
 
@@ -55,6 +57,7 @@ export async function createTrip(data: CreateTripDTO): Promise<TripDTO> {
         Time: data.time || null,
         Location: data.location || null,
         Content: data.content || null,
+        IsActive: data.isActive ?? true,
       },
     })
     return mapTripToDTO(trip)
@@ -85,6 +88,7 @@ export async function updateTrip(
         Location:
           data.location !== undefined ? data.location : trip.Location,
         Content: data.content !== undefined ? data.content : trip.Content,
+        IsActive: data.isActive !== undefined ? data.isActive : trip.IsActive,
       },
     })
 

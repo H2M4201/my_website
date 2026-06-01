@@ -65,16 +65,6 @@ export default function ExperiencesPage() {
               onChange={(e) => onChange({ ...data, achievement: e.target.value })}
             />
           </FormField>
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="isActive"
-              checked={data.isActive ?? true}
-              onChange={(e) => onChange({ ...data, isActive: e.target.checked })}
-              className="w-4 h-4 accent-blue-500"
-            />
-            <label htmlFor="isActive" className="text-sm font-medium text-gray-300">Active</label>
-          </div>
           <FormField label="Sort Order" name="sortOrder">
             <Input
               name="sortOrder"

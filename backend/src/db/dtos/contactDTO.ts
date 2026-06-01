@@ -3,18 +3,21 @@ export interface ContactDTO {
   type: string
   info: string
   icon: string | null
+  isActive: boolean
 }
 
 export interface CreateContactDTO {
   type: string
   info: string
   icon?: string | null
+  isActive?: boolean
 }
 
 export interface UpdateContactDTO {
   type?: string
   info?: string
   icon?: string | null
+  isActive?: boolean
 }
 
 export class ContactNotFoundError extends Error {

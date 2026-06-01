@@ -14,10 +14,10 @@ All API requests are now logged to make debugging easier:
 When the homepage loads or makes API requests, you'll see logs like:
 
 ```
-[Homepage] 🚀 GET http://localhost:4000/api/sections
-[Homepage] ✅ GET http://localhost:4000/api/sections → 200 (5 items)
-[Homepage] 🚀 GET http://localhost:4000/api/contacts
-[Homepage] ✅ GET http://localhost:4000/api/contacts → 200 (3 items)
+[Homepage] 🚀 GET https://localhost:4000/api/sections
+[Homepage] ✅ GET https://localhost:4000/api/sections → 200 (5 items)
+[Homepage] 🚀 GET https://localhost:4000/api/contacts
+[Homepage] ✅ GET https://localhost:4000/api/contacts → 200 (3 items)
 ```
 
 **Where to see these logs:**
