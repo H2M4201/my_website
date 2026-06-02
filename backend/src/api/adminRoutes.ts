@@ -16,6 +16,9 @@ import {
   getAllRecipes, getRecipeById, createRecipe, updateRecipe, deleteRecipe, RecipeNotFoundError,
 } from '../db'
 import {
+  getAllIngredients, getIngredientById, createIngredient, updateIngredient, deleteIngredient, IngredientNotFoundError,
+} from '../db'
+import {
   getAllExperiences, getExperienceById, createExperience, updateExperience, deleteExperience, ExperienceNotFoundError,
 } from '../db'
 import {
@@ -30,6 +33,7 @@ import {
   blogIdParamSchema, createBlogRequestSchema, updateBlogRequestSchema, blogResponseSchema,
   tripIdParamSchema, createTripRequestSchema, updateTripRequestSchema, tripResponseSchema,
   recipeIdParamSchema, createRecipeRequestSchema, updateRecipeRequestSchema, recipeResponseSchema,
+  ingredientIdParamSchema, createIngredientRequestSchema, updateIngredientRequestSchema, ingredientResponseSchema,
   experienceIdParamSchema, createExperienceRequestSchema, updateExperienceRequestSchema, experienceResponseSchema,
   expertiseCategoryIdParamSchema, createExpertiseCategoryRequestSchema, updateExpertiseCategoryRequestSchema, expertiseCategoryResponseSchema,
   jobDescriptionIdParamSchema, createJobDescriptionRequestSchema, updateJobDescriptionRequestSchema, jobDescriptionResponseSchema,
@@ -156,6 +160,18 @@ const resourceHandlers: Record<string, ResourceHandlers> = {
     responseSchema: recipeResponseSchema,
     notFoundError: RecipeNotFoundError,
   },
+  ingredient: {
+    getAll: getAllIngredients,
+    getById: getIngredientById,
+    create: createIngredient,
+    update: updateIngredient,
+    delete: deleteIngredient,
+    idSchema: ingredientIdParamSchema,
+    createSchema: createIngredientRequestSchema,
+    updateSchema: updateIngredientRequestSchema,
+    responseSchema: ingredientResponseSchema,
+    notFoundError: IngredientNotFoundError,
+  },
   experience: {
     getAll: () => getAllExperiences(true),
     getById: getExperienceById,
@@ -236,6 +252,7 @@ adminRouter.get('/:resource/:id', async (req, res) => {
         error instanceof BlogNotFoundError ||
         error instanceof TripNotFoundError ||
         error instanceof RecipeNotFoundError ||
+        error instanceof IngredientNotFoundError ||
         error instanceof ExperienceNotFoundError ||
         error instanceof ExpertiseCategoryNotFoundError ||
         error instanceof JobDescriptionNotFoundError) {
@@ -298,6 +315,7 @@ adminRouter.patch('/update/:resource/:id', async (req, res) => {
         error instanceof BlogNotFoundError ||
         error instanceof TripNotFoundError ||
         error instanceof RecipeNotFoundError ||
+        error instanceof IngredientNotFoundError ||
         error instanceof ExperienceNotFoundError ||
         error instanceof ExpertiseCategoryNotFoundError ||
         error instanceof JobDescriptionNotFoundError) {
@@ -333,6 +351,7 @@ adminRouter.delete('/delete/:resource/:id', async (req, res) => {
         error instanceof BlogNotFoundError ||
         error instanceof TripNotFoundError ||
         error instanceof RecipeNotFoundError ||
+        error instanceof IngredientNotFoundError ||
         error instanceof ExperienceNotFoundError ||
         error instanceof ExpertiseCategoryNotFoundError ||
         error instanceof JobDescriptionNotFoundError) {

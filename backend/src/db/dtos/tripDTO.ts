@@ -1,6 +1,7 @@
 export interface TripDTO {
   id: number
   title: string
+  description: string | null
   time: string | null
   location: string | null
   content: string | null
@@ -9,6 +10,7 @@ export interface TripDTO {
 
 export interface CreateTripDTO {
   title: string
+  description?: string | null
   time?: string | null
   location?: string | null
   content?: string | null
@@ -17,6 +19,7 @@ export interface CreateTripDTO {
 
 export interface UpdateTripDTO {
   title?: string
+  description?: string | null
   time?: string | null
   location?: string | null
   content?: string | null

@@ -1,64 +1,15 @@
-
-
 import Link from 'next/link'
 import { Layout, MainContent } from '@/components/Layout'
+import { getAllTrips, getTripById } from '@/lib/api'
 
-const trips = [
-  {
-    slug: 'tokyo-japan',
-    title: 'Tokyo, Japan',
-    location: 'Shibuya · Akihabara · Asakusa',
-    date: 'Summer 2024',
-    summary: 'A dynamic blend of neon-lit streets, elevated cuisine, and cultural contrasts. This trip captured the future-ready energy of Tokyo while staying deeply rooted in tradition.',
-    highlights: [
-      'Sunset at Shibuya Crossing and immersive street ramen.',
-      'Explored Akihabara’s tech streets and the latest Japanese design.',
-      'Found calm moments at Senso-ji Temple and Asakusa riverside cafes.',
-    ],
-    details: [
-      'Built a visual travel story around the contrast between modern district life and historical temples.',
-      'Captured how design systems and user flows translate into real-world journeys.',
-      'Noted the influence of Japanese minimalism on my frontend design aesthetic.',
-    ],
-  },
-  {
-    slug: 'paris-france',
-    title: 'Paris, France',
-    location: 'Montmartre · Seine · Le Marais',
-    date: 'Spring 2024',
-    summary: 'Elegant architecture, vibrant street cafés, and creative inspiration at every corner. Paris was a study in rhythm, light, and storytelling through design.',
-    highlights: [
-      'Wandered through Montmartre, stopping at galleries and hidden courtyards.',
-      'Captured golden-hour light along the Seine with a design-focused lens.',
-      'Explored modern French cafés that blend hospitality and minimal UX.',
-    ],
-    details: [
-      'Used the trip as inspiration for more polished typography and whitespace in portfolio layouts.',
-      'Observed how Parisian branding balances craft, luxury, and clarity.',
-      'Noted the importance of atmosphere in product presentation and storytelling.',
-    ],
-  },
-  {
-    slug: 'bali-indonesia',
-    title: 'Bali, Indonesia',
-    location: 'Ubud · Seminyak · Canggu',
-    date: 'Winter 2023',
-    summary: 'A sensory-rich escape into tropical culture, nature, and mindful creativity. Bali inspired fresh color palettes, legacy systems, and calm motion design.',
-    highlights: [
-      'Explored rice terraces and village temples in Ubud’s lush landscapes.',
-      'Tasted local street food and learned about island culinary rituals.',
-      'Found inspiration in Balinese craftsmanship, patterns, and natural materials.',
-    ],
-    details: [
-      'Collected references for relaxed page pacing and immersive storytelling.',
-      'Refined how to balance bold visuals with approachable layouts.',
-      'Applied lessons in contrast and texture to responsive portfolio components.',
-    ],
-  },
-]
-
-export function generateStaticParams() {
-  return trips.map((trip) => ({ slug: trip.slug }))
+export async function generateStaticParams() {
+  try {
+    const trips = await getAllTrips()
+    return trips.map((trip) => ({ slug: String(trip.id) }))
+  } catch (error) {
+    console.error('Error generating static params:', error)
+    return []
+  }
 }
 
 interface TripPageProps {
@@ -67,16 +18,88 @@ interface TripPageProps {
   }
 }
 
-export default function TripDetail({ params: { slug } }: TripPageProps) {
-  const trip = trips.find((item) => item.slug === slug)
+export default async function TripDetail({ params: { slug } }: TripPageProps) {
+  try {
+    const tripId = parseInt(slug, 10)
+    if (isNaN(tripId)) {
+      throw new Error('Invalid trip ID')
+    }
 
-  if (!trip) {
+    const trip = await getTripById(tripId)
+
+    if (!trip) {
+      return (
+        <Layout>
+          <MainContent>
+            <div className="max-w-3xl mx-auto text-center py-24">
+              <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">Trip not found</h1>
+              <p className="text-slate-600 dark:text-slate-300 mb-6">The story you are looking for has not been published yet.</p>
+              <Link href="/trips" className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                Back to Trips
+              </Link>
+            </div>
+          </MainContent>
+        </Layout>
+      )
+    }
+
+    const contentLines = trip.content?.split('\n').filter((line) => line.trim()) || []
+
+    return (
+      <Layout>
+        <MainContent>
+          <div className="max-w-5xl mx-auto space-y-10">
+            <header className="rounded-[2rem] bg-white dark:bg-zinc-950 border border-slate-200 dark:border-slate-800 shadow-2xl px-8 py-10">
+              <div className="flex flex-col gap-6">
+                <Link href="/trips" className="self-start">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800"
+                  >
+                    Back to Trips
+                  </button>
+                </Link>
+
+                <div className="flex flex-col gap-3">
+                  <span className="text-sm uppercase tracking-[0.3em] text-blue-600 dark:text-blue-400">Travel</span>
+                  <h1 className="text-5xl font-bold text-slate-900 dark:text-white">{trip.title}</h1>
+                  <p className="text-lg text-slate-600 dark:text-slate-300 max-w-3xl">{trip.description || 'No description'}</p>
+                  <div className="flex gap-4 text-sm text-slate-500 dark:text-slate-400">
+                    {trip.location && <span>📍 {trip.location}</span>}
+                    {trip.time && <span>📅 {trip.time}</span>}
+                  </div>
+                </div>
+              </div>
+            </header>
+
+            <article className="space-y-8 rounded-3xl border border-slate-200/80 bg-white p-8 shadow-xl dark:border-slate-700/80 dark:bg-zinc-950">
+              {contentLines.length > 0 ? (
+                <>
+                  <h2 className="text-3xl font-semibold text-slate-900 dark:text-white">Story Details</h2>
+                  <div className="space-y-4 text-slate-600 dark:text-slate-300">
+                    {contentLines.map((line, idx) => (
+                      <p key={idx} className="rounded-2xl bg-slate-50 dark:bg-zinc-900 p-4 shadow-sm leading-relaxed">
+                        {line}
+                      </p>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-slate-600 dark:text-slate-300">No content available for this trip story.</p>
+              )}
+            </article>
+          </div>
+        </MainContent>
+      </Layout>
+    )
+  } catch (error) {
+    console.error('Error loading trip:', error)
     return (
       <Layout>
         <MainContent>
           <div className="max-w-3xl mx-auto text-center py-24">
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">Trip not found</h1>
-            <p className="text-slate-600 dark:text-slate-300 mb-6">The story you are looking for has not been published yet.</p>
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">Error loading story</h1>
+            <p className="text-slate-600 dark:text-slate-300 mb-6">There was an error loading this trip story.</p>
             <Link href="/trips" className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors">
               Back to Trips
             </Link>
@@ -85,67 +108,4 @@ export default function TripDetail({ params: { slug } }: TripPageProps) {
       </Layout>
     )
   }
-
-  return (
-    <Layout>
-      <MainContent>
-        <div className="max-w-6xl mx-auto space-y-10">
-          <section className="rounded-[2rem] overflow-hidden bg-slate-900 text-white shadow-2xl">
-            <div className="bg-gradient-to-r from-blue-600 via-slate-900 to-purple-700 px-8 py-12 md:px-14 md:py-16">
-              <p className="text-sm uppercase tracking-[0.3em] text-blue-200 mb-4">Travel story</p>
-              <h1 className="text-5xl font-semibold tracking-tight mb-4">{trip.title}</h1>
-              <p className="text-lg text-slate-200 max-w-3xl">{trip.summary}</p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <span className="rounded-full bg-white/10 px-4 py-2 text-sm text-white">{trip.location}</span>
-                <span className="rounded-full bg-white/10 px-4 py-2 text-sm text-white">{trip.date}</span>
-              </div>
-            </div>
-          </section>
-
-          <div className="grid gap-8 xl:grid-cols-[1.5fr_0.9fr]">
-            <article className="space-y-8">
-              <div className="rounded-3xl border border-slate-200/80 bg-white p-8 shadow-xl dark:border-slate-700/80 dark:bg-zinc-950">
-                <h2 className="text-3xl font-semibold text-slate-900 dark:text-white mb-4">What made this trip special</h2>
-                <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                  This journey blends cultural discovery and design inspiration. Each destination contributed new ideas for motion, typography, and spatial hierarchy in digital experiences.
-                </p>
-              </div>
-
-              <div className="rounded-3xl border border-slate-200/80 bg-white p-8 shadow-xl dark:border-slate-700/80 dark:bg-zinc-950">
-                <h3 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">Highlights</h3>
-                <ul className="space-y-3 text-slate-600 dark:text-slate-300">
-                  {trip.highlights.map((item) => (
-                    <li key={item} className="rounded-2xl bg-slate-50 dark:bg-zinc-900 p-4 shadow-sm">{item}</li>
-                  ))}
-                </ul>
-              </div>
-            </article>
-
-            <aside className="space-y-6">
-              <div className="rounded-3xl border border-slate-200/80 bg-white p-7 shadow-xl dark:border-slate-700/80 dark:bg-zinc-950">
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">Design notes</h3>
-                <ul className="space-y-3 text-slate-600 dark:text-slate-300">
-                  {trip.details.map((note) => (
-                    <li key={note} className="rounded-2xl bg-slate-50 dark:bg-zinc-900 p-4 shadow-sm">{note}</li>
-                  ))}
-                </ul>
-              </div>
-              <div className="rounded-3xl border border-slate-200/80 bg-white p-7 shadow-xl dark:border-slate-700/80 dark:bg-zinc-950">
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">Next steps</h3>
-                <p className="text-slate-600 dark:text-slate-300">
-                  Apply the visual and interaction ideas from this story to future portfolio pieces, product case studies, and travel-inspired design systems.
-                </p>
-              </div>
-              <Link
-                href="/trips"
-                className="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-white font-semibold shadow-lg hover:from-purple-600 hover:to-blue-700 transition-colors"
-              >
-                Back to Trips
-              </Link>
-            </aside>
-          </div>
-        </div>
-      </MainContent>
-    </Layout>
-  )
 }

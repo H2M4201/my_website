@@ -14,11 +14,17 @@ interface NavGroup {
 
 const NAV_GROUPS: (NavGroup | { label: string; href: string })[] = [
   { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Sections', href: '/dashboard/sections' },
-  { label: 'Contacts', href: '/dashboard/contacts' },
+  {
+    label: 'Master Data',
+    children: [
+      { label: 'Section', href: '/dashboard/sections' },
+      { label: 'Contact', href: '/dashboard/contacts' },
+      { label: 'Ingredient', href: '/dashboard/ingredients' },
+    ],
+  },
   { label: 'Blogs', href: '/dashboard/blogs' },
-  { label: 'Recipes', href: '/dashboard/recipes' },
   { label: 'Trips', href: '/dashboard/trips' },
+  { label: 'Recipes', href: '/dashboard/recipes' },
   {
     label: 'Resume',
     children: [
@@ -28,9 +34,15 @@ const NAV_GROUPS: (NavGroup | { label: string; href: string })[] = [
       { label: 'Expertise', href: '/dashboard/expertise' },
     ],
   },
-  { label: 'Users', href: '/dashboard/users' },
-  { label: 'Roles', href: '/dashboard/roles' },
-  { label: 'Permissions', href: '/dashboard/permissions' },
+  {
+    label: 'Access Control',
+    children: [
+      { label: 'User', href: '/dashboard/users' },
+      { label: 'Role', href: '/dashboard/roles' },
+      { label: 'Permission', href: '/dashboard/permissions' },
+    ],
+  },
+  { label: 'Settings', href: '/dashboard/settings' },
 ]
 
 export function Sidebar() {

@@ -42,6 +42,7 @@ export interface Blog {
 export interface Trip {
   id: number
   title: string
+  description: string | null
   time: string | null
   location: string | null
   content: string | null
@@ -54,9 +55,25 @@ export interface Recipe {
   id: number
   name: string
   description: string | null
+  ingredients: string | null
+  steps: string | null
   isActive: boolean
   createdAt: string
   updatedAt: string
+}
+
+export interface Ingredient {
+  id: number
+  ingredientName: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface IngredientRecipe {
+  ingredientID: number
+  recipeID: number
+  sortOrder: number
 }
 
 export interface Resume {
@@ -140,6 +157,7 @@ export type ResourceType =
   | 'blog'
   | 'trip'
   | 'recipe'
+  | 'ingredient'
   | 'resume'
   | 'experience'
   | 'expertise'

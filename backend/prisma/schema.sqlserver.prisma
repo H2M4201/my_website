@@ -62,14 +62,15 @@ model BlogCategory {
 }
 
 model Trip {
-  id        Int      @id @default(autoincrement())
-  Title     String   @db.NVarChar(255)
-  Time      String?  @db.NVarChar(100)
-  Location  String?  @db.NVarChar(255)
-  Content   String?  @db.NVarChar(max)
-  IsActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  Title       String   @db.NVarChar(255)
+  Description String?  @db.NVarChar(1000)
+  Time        String?  @db.NVarChar(100)
+  Location    String?  @db.NVarChar(255)
+  Content     String?  @db.NVarChar(max)
+  IsActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("Trip")
 }
@@ -78,11 +79,39 @@ model Recipe {
   id          Int      @id @default(autoincrement())
   Name        String   @db.NVarChar(255)
   Description String?  @db.NVarChar(1000)
+  Ingredients String?  @db.NVarChar(max)
+  Steps       String?  @db.NVarChar(max)
   IsActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  ingredientRecipes IngredientRecipe[]
+
   @@map("Recipe")
+}
+
+model Ingredient {
+  id             Int      @id @default(autoincrement())
+  IngredientName String   @db.NVarChar(255)
+  IsActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  recipeLinks IngredientRecipe[]
+
+  @@map("Ingredient")
+}
+
+model IngredientRecipe {
+  ingredientID Int
+  recipeID     Int
+  sortOrder    Int      @default(0)
+
+  ingredient Ingredient @relation(fields: [ingredientID], references: [id], onDelete: Cascade)
+  recipe     Recipe     @relation(fields: [recipeID], references: [id], onDelete: Cascade)
+
+  @@id([ingredientID, recipeID])
+  @@map("IngredientRecipe")
 }
 
 model Experience {

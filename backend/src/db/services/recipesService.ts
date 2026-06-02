@@ -10,12 +10,16 @@ function mapRecipeToDTO(recipe: {
   id: number
   Name: string
   Description: string | null
+  Ingredients: string | null
+  Steps: string | null
   IsActive: boolean
 }): RecipeDTO {
   return {
     id: recipe.id,
     name: recipe.Name,
     description: recipe.Description,
+    ingredients: recipe.Ingredients,
+    steps: recipe.Steps,
     isActive: recipe.IsActive,
   }
 }
@@ -25,7 +29,7 @@ export async function getAllRecipes(): Promise<RecipeDTO[]> {
     const recipes = await prisma.recipe.findMany({
       orderBy: { id: 'asc' },
     })
-    return recipes.map(mapRecipeToDTO)
+    return recipes.map((r) => mapRecipeToDTO(r as any))
   } catch (error) {
     console.error('Error fetching recipes:', error)
     throw new Error('Failed to fetch recipes from database')
@@ -42,7 +46,7 @@ export async function getRecipeById(id: number): Promise<RecipeDTO> {
       throw new RecipeNotFoundError(id)
     }
 
-    return mapRecipeToDTO(recipe)
+    return mapRecipeToDTO(recipe as any)
   } catch (error) {
     if (error instanceof RecipeNotFoundError) throw error
     console.error('Error fetching recipe:', error)
@@ -56,10 +60,12 @@ export async function createRecipe(data: CreateRecipeDTO): Promise<RecipeDTO> {
       data: {
         Name: data.name,
         Description: data.description || null,
+        Ingredients: data.ingredients || null,
+        Steps: data.steps || null,
         IsActive: data.isActive ?? true,
       },
     })
-    return mapRecipeToDTO(recipe)
+    return mapRecipeToDTO(recipe as any)
   } catch (error) {
     console.error('Error creating recipe:', error)
     throw new Error('Failed to create recipe in database')
@@ -82,16 +88,24 @@ export async function updateRecipe(
     const updated = await prisma.recipe.update({
       where: { id },
       data: {
-        Name: data.name !== undefined ? data.name : recipe.Name,
+        Name: data.name !== undefined ? data.name : (recipe as any).Name,
         Description:
           data.description !== undefined
             ? data.description
-            : recipe.Description,
-        IsActive: data.isActive !== undefined ? data.isActive : recipe.IsActive,
+            : (recipe as any).Description,
+        Ingredients:
+          data.ingredients !== undefined
+            ? data.ingredients
+            : (recipe as any).Ingredients,
+        Steps:
+          data.steps !== undefined
+            ? data.steps
+            : (recipe as any).Steps,
+        IsActive: data.isActive !== undefined ? data.isActive : (recipe as any).IsActive,
       },
     })
 
-    return mapRecipeToDTO(updated)
+    return mapRecipeToDTO(updated as any)
   } catch (error) {
     if (error instanceof RecipeNotFoundError) throw error
     console.error('Error updating recipe:', error)

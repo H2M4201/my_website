@@ -26,6 +26,7 @@
              For new columns with defaults, use UPDATE statements to backfill old records.
              Never DROP/CREATE tables — use ALTER TABLE ADD columns with defaults so no data is lost.
              Verify row counts match before/after migration.)
+             For newly created table, always add sample data into it
             Files: backend/scripts/data-migrations/**
             (One-time migration scripts for transforming existing data into new schema shape)
 

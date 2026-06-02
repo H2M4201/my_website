@@ -21,6 +21,7 @@ export default function TripsPage() {
       resource="trip"
       columns={[
         { key: 'title', label: 'Title' },
+        { key: 'description', label: 'Description' },
         { key: 'location', label: 'Location' },
         { key: 'time', label: 'Time' },
       ]}
@@ -32,6 +33,13 @@ export default function TripsPage() {
               name="title"
               value={data.title || ''}
               onChange={(e) => onChange({ ...data, title: e.target.value })}
+            />
+          </FormField>
+          <FormField label="Description" name="description">
+            <Input
+              name="description"
+              value={data.description || ''}
+              onChange={(e) => onChange({ ...data, description: e.target.value })}
             />
           </FormField>
           <FormField label="Location" name="location">

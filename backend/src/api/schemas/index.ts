@@ -90,6 +90,7 @@ export const tripIdParamSchema = z.coerce.number().positive()
 
 export const createTripRequestSchema = z.object({
   title: z.string().min(1).max(255),
+  description: z.string().nullable().optional(),
   time: z.string().nullable().optional(),
   location: z.string().nullable().optional(),
   content: z.string().nullable().optional(),
@@ -98,6 +99,7 @@ export const createTripRequestSchema = z.object({
 
 export const updateTripRequestSchema = z.object({
   title: z.string().min(1).max(255).optional(),
+  description: z.string().nullable().optional(),
   time: z.string().nullable().optional(),
   location: z.string().nullable().optional(),
   content: z.string().nullable().optional(),
@@ -107,6 +109,7 @@ export const updateTripRequestSchema = z.object({
 export const tripResponseSchema = z.object({
   id: z.number(),
   title: z.string(),
+  description: z.string().nullable(),
   time: z.string().nullable(),
   location: z.string().nullable(),
   content: z.string().nullable(),
@@ -122,12 +125,16 @@ export const recipeIdParamSchema = z.coerce.number().positive()
 export const createRecipeRequestSchema = z.object({
   name: z.string().min(1).max(255),
   description: z.string().nullable().optional(),
+  ingredients: z.string().nullable().optional(),
+  steps: z.string().nullable().optional(),
   isActive: z.boolean().optional(),
 })
 
 export const updateRecipeRequestSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   description: z.string().nullable().optional(),
+  ingredients: z.string().nullable().optional(),
+  steps: z.string().nullable().optional(),
   isActive: z.boolean().optional(),
 })
 
@@ -135,10 +142,36 @@ export const recipeResponseSchema = z.object({
   id: z.number(),
   name: z.string(),
   description: z.string().nullable(),
+  ingredients: z.string().nullable(),
+  steps: z.string().nullable(),
   isActive: z.boolean(),
 })
 
 export const recipesListResponseSchema = z.array(recipeResponseSchema)
+
+// ===== Ingredient Schemas =====
+
+export const ingredientIdParamSchema = z.coerce.number().positive()
+
+export const createIngredientRequestSchema = z.object({
+  ingredientName: z.string().min(1).max(255),
+  isActive: z.boolean().optional(),
+})
+
+export const updateIngredientRequestSchema = z.object({
+  ingredientName: z.string().min(1).max(255).optional(),
+  isActive: z.boolean().optional(),
+})
+
+export const ingredientResponseSchema = z.object({
+  id: z.number(),
+  ingredientName: z.string(),
+  isActive: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+})
+
+export const ingredientsListResponseSchema = z.array(ingredientResponseSchema)
 
 // ===== Experience Schemas =====
 

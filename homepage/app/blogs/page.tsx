@@ -1,32 +1,18 @@
-'use client'
-
 import Link from 'next/link'
 import { Layout, MainContent } from '@/components/Layout'
+import { getAllBlogs } from '@/lib/api'
 
-export default function Blogs() {
-  const blogs = [
-    {
-      id: 1,
-      slug: 'modern-frontend-patterns',
-      title: 'Modern Frontend Patterns',
-      date: 'May 2024',
-      excerpt: 'Exploring composition patterns, hooks, and best practices in React development.',
-    },
-    {
-      id: 2,
-      slug: 'performance-optimization-tips',
-      title: 'Performance Optimization Tips',
-      date: 'April 2024',
-      excerpt: 'Techniques for improving web application performance and user experience.',
-    },
-    {
-      id: 3,
-      slug: 'accessibility-in-web-design',
-      title: 'Accessibility in Web Design',
-      date: 'March 2024',
-      excerpt: 'Building inclusive digital products that work for everyone.',
-    },
-  ]
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+export default async function Blogs() {
+  const blogs = await getAllBlogs()
 
   return (
     <Layout>
@@ -45,12 +31,12 @@ export default function Blogs() {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-4">
                   <div>
                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{blog.title}</h2>
-                    <p className="text-sm uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400 mt-2">{blog.date}</p>
+                    <p className="text-sm uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400 mt-2">{blog.description ? blog.description.substring(0, 50) : 'Untitled'}</p>
                   </div>
                 </div>
-                <p className="text-slate-600 dark:text-slate-300 mb-6">{blog.excerpt}</p>
+                <p className="text-slate-600 dark:text-slate-300 mb-6">{blog.description || 'No description available'}</p>
                 <Link
-                  href={`/blogs/${blog.slug}`}
+                  href={`/blogs/${blog.id}`}
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg hover:from-purple-600 hover:to-blue-700 transition-colors"
                 >
                   Read Article

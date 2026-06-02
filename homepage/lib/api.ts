@@ -1,4 +1,6 @@
 import type {
+  BlogDTO,
+  TripDTO,
   ContactDTO,
   SectionDTO,
   ExperienceDTO,
@@ -88,6 +90,102 @@ export async function getAllContacts(): Promise<ContactDTO[]> {
     return data
   } catch (error) {
     console.error('[Homepage] getAllContacts error:', error)
+    throw error
+  }
+}
+
+export async function getAllBlogs(): Promise<BlogDTO[]> {
+  try {
+    const url = `${getApiBaseUrl()}/api/v1/blogs`
+
+    const response = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+      next: { revalidate: DEFAULT_REVALIDATION },
+    })
+    console.log(`[Homepage] 🚀 GET ${url}`)
+
+    if (!response.ok) {
+      console.error(`[Homepage] ❌ GET ${url} → ${response.status}`)
+      throw new Error(`HTTP ${response.status}: Failed to fetch blogs`)
+    }
+
+    const data = await response.json()
+    console.log(`[Homepage] ✅ GET ${url} → ${response.status} (${Array.isArray(data) ? data.length : 1} items)`)
+    return data
+  } catch (error) {
+    console.error('[Homepage] getAllBlogs error:', error)
+    throw error
+  }
+}
+
+export async function getBlogById(id: number): Promise<BlogDTO> {
+  try {
+    const url = `${getApiBaseUrl()}/api/v1/blogs/${id}`
+
+    const response = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+      next: { revalidate: DEFAULT_REVALIDATION },
+    })
+    console.log(`[Homepage] 🚀 GET ${url}`)
+
+    if (!response.ok) {
+      console.error(`[Homepage] ❌ GET ${url} → ${response.status}`)
+      throw new Error(`HTTP ${response.status}: Failed to fetch blog`) 
+    }
+
+    const data = await response.json()
+    console.log(`[Homepage] ✅ GET ${url} → ${response.status}`)
+    return data
+  } catch (error) {
+    console.error('[Homepage] getBlogById error:', error)
+    throw error
+  }
+}
+
+export async function getAllTrips(): Promise<TripDTO[]> {
+  try {
+    const url = `${getApiBaseUrl()}/api/v1/trips`
+
+    const response = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+      next: { revalidate: DEFAULT_REVALIDATION },
+    })
+    console.log(`[Homepage] 🚀 GET ${url}`)
+
+    if (!response.ok) {
+      console.error(`[Homepage] ❌ GET ${url} → ${response.status}`)
+      throw new Error(`HTTP ${response.status}: Failed to fetch trips`)
+    }
+
+    const data = await response.json()
+    console.log(`[Homepage] ✅ GET ${url} → ${response.status} (${Array.isArray(data) ? data.length : 1} items)`)
+    return data
+  } catch (error) {
+    console.error('[Homepage] getAllTrips error:', error)
+    throw error
+  }
+}
+
+export async function getTripById(id: number): Promise<TripDTO> {
+  try {
+    const url = `${getApiBaseUrl()}/api/v1/trips/${id}`
+
+    const response = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+      next: { revalidate: DEFAULT_REVALIDATION },
+    })
+    console.log(`[Homepage] 🚀 GET ${url}`)
+
+    if (!response.ok) {
+      console.error(`[Homepage] ❌ GET ${url} → ${response.status}`)
+      throw new Error(`HTTP ${response.status}: Failed to fetch trip`) 
+    }
+
+    const data = await response.json()
+    console.log(`[Homepage] ✅ GET ${url} → ${response.status}`)
+    return data
+  } catch (error) {
+    console.error('[Homepage] getTripById error:', error)
     throw error
   }
 }

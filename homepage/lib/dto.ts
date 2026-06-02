@@ -14,6 +14,24 @@ export interface ContactDTO {
   icon: string | null
 }
 
+export interface BlogDTO {
+  id: number
+  title: string
+  description: string | null
+  content: string | null
+  isActive: boolean
+}
+
+export interface TripDTO {
+  id: number
+  title: string
+  description: string | null
+  time: string | null
+  location: string | null
+  content: string | null
+  isActive: boolean
+}
+
 // ===== Resume DTOs =====
 
 export interface JobDescriptionDTO {

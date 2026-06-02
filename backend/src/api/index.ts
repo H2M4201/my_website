@@ -5,6 +5,7 @@ import { sectionsRouter } from './routes/sections.routes'
 import { blogsRouter } from './routes/blogs.routes'
 import { tripsRouter } from './routes/trips.routes'
 import { recipesRouter } from './routes/recipes.routes'
+import { ingredientsRouter } from './routes/ingredients.routes'
 import { resumeRouter } from './routes/resume.routes'
 import { authRouter } from './routes/auth.routes'
 import { adminRouter, ADMIN_API_PREFIX } from './adminRoutes'
@@ -129,6 +130,7 @@ export function registerApiRoutes(app: Express): void {
   app.use('/api/v1/blogs', blogsRouter)
   app.use('/api/v1/trips', tripsRouter)
   app.use('/api/v1/recipes', recipesRouter)
+  app.use('/api/v1/ingredients', ingredientsRouter)
   app.use('/api/v1/resume', resumeRouter)
 
   // Public read endpoints for admin page CrudTemplate compatibility

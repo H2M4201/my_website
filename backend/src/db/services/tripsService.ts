@@ -12,6 +12,7 @@ function mapTripToDTO(trip: {
   return {
     id: trip.id,
     title: trip.Title,
+    description: null,
     time: trip.Time,
     location: trip.Location,
     content: trip.Content,
