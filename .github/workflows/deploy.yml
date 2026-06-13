@@ -34,12 +34,9 @@ jobs:
         service_account: ${{ env.SERVICE_ACCOUNT }}
 
     # Đăng nhập vào Artifact Registry
-    - name: Login to Artifact Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGION }}-docker.pkg.dev
-        username: oauth2accesstoken  # <-- Đổi từ _json_key thành oauth2accesstoken
-        password: ${{ steps.auth.outputs.access_token }} # <-- Trỏ đúng vào output access_token
+    - name: Configure Docker for GCP
+      run: |
+        gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
     # ---------------------------------------------------------
     # Giả định xử lý Container 1 (Ví dụ: API Service)
