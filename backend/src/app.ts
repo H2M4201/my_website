@@ -44,8 +44,8 @@ export function createApp(): Express {
         'http://127.0.0.1:5000',
         'https://127.0.0.1:5000',
         // Docker internal hostnames
-        'https://homepage:3000',
-        'https://adminPage:5000',
+        'http://homepage:3000',
+        'http://adminPage:5000',
       ]
   app.use(cors({ origin: corsOrigins }))
   app.use(express.json())

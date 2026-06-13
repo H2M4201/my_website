@@ -5,7 +5,7 @@ import type {
   SectionDTO,
   ExperienceDTO,
   ExpertiseCategoryDTO,
-} from './dto'
+} from '@/lib/dto'
 
 function getApiBaseUrl(): string {
   return (
@@ -100,7 +100,7 @@ export async function getAllBlogs(): Promise<BlogDTO[]> {
 
     const response = await fetch(url, {
       headers: { 'Content-Type': 'application/json' },
-      next: { revalidate: DEFAULT_REVALIDATION },
+      next: { tags: ['blogs'], revalidate: DEFAULT_REVALIDATION },
     })
     console.log(`[Homepage] 🚀 GET ${url}`)
 
@@ -124,7 +124,7 @@ export async function getBlogById(id: number): Promise<BlogDTO> {
 
     const response = await fetch(url, {
       headers: { 'Content-Type': 'application/json' },
-      next: { revalidate: DEFAULT_REVALIDATION },
+      next: { tags: ['blogs'], revalidate: DEFAULT_REVALIDATION },
     })
     console.log(`[Homepage] 🚀 GET ${url}`)
 
@@ -148,7 +148,7 @@ export async function getAllTrips(): Promise<TripDTO[]> {
 
     const response = await fetch(url, {
       headers: { 'Content-Type': 'application/json' },
-      next: { revalidate: DEFAULT_REVALIDATION },
+      next: { tags: ['trips'], revalidate: DEFAULT_REVALIDATION },
     })
     console.log(`[Homepage] 🚀 GET ${url}`)
 
@@ -172,7 +172,7 @@ export async function getTripById(id: number): Promise<TripDTO> {
 
     const response = await fetch(url, {
       headers: { 'Content-Type': 'application/json' },
-      next: { revalidate: DEFAULT_REVALIDATION },
+      next: { tags: ['trips'], revalidate: DEFAULT_REVALIDATION },
     })
     console.log(`[Homepage] 🚀 GET ${url}`)
 
@@ -242,7 +242,7 @@ export async function getAllExpertiseCategories(): Promise<ExpertiseCategoryDTO[
 
 export type {
   ContactDTO,
-  SectionDTO,
+  SectionDTO, 
   ExperienceDTO,
   ExpertiseCategoryDTO,
-} from './dto'
+} from '@/lib/dto'

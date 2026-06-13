@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Layout, MainContent } from '@/components/Layout'
-import { getAllTrips, getTripById } from '@/lib/api'
+import { getAllTrips, getTripById } from '@/app/api/endpoints'
 
 export async function generateStaticParams() {
   try {

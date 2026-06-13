@@ -1,0 +1,70 @@
+name: Build and Deploy to GCP Cloud Run
+
+on:
+  push:
+    branches:
+      - main  # Hoặc production tùy bạn chọn
+
+env:
+  PROJECT_ID: 'my-website-h2m' # Thay bằng GCP Project ID của bạn
+  REGION: 'asia-southeast1'          # Khu vực deploy (vd: Singapore)
+  GAR_REPO: 'my-app-repo'            # Tên Artifact Registry đã tạo ở Bước 2.2
+  
+  # Thông tin Workload Identity từ Bước 2.3
+  WORKLOAD_PROVIDER: 'projects/295660553920/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+  SERVICE_ACCOUNT: 'github-actions-deployer@my-website-h2m.iam.gserviceaccount.com'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write' # Bắt buộc phải có để authenticate OIDC
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Bước quan trọng: Xác thực với GCP bằng Workload Identity Federation
+    - name: Authenticate to Google Cloud
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ env.WORKLOAD_PROVIDER }}
+        service_account: ${{ env.SERVICE_ACCOUNT }}
+
+    # Đăng nhập vào Artifact Registry
+    - name: Login to Artifact Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGION }}-docker.pkg.dev
+        username: _json_key
+        password: ${{ steps.auth.outputs.credentials_json }}
+
+    # ---------------------------------------------------------
+    # Giả định xử lý Container 1 (Ví dụ: API Service)
+    # ---------------------------------------------------------
+    - name: Build and Push Container 1
+      env:
+        IMG_NAME: 'api-service'
+      run: |
+        TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/${{ env.IMG_NAME }}:${{ github.sha }}"
+        docker build -t $TAG -f ./services/api/Dockerfile ./services/api
+        docker push $TAG
+        echo "CONTAINER_1_TAG=$TAG" >> $GITHUB_ENV
+
+    - name: Deploy Container 1 to Cloud Run
+      uses: google-github-actions/deploy-cloudrun@v2
+      with:
+        service: 'api-service'
+        region: ${{ env.REGION }}
+        image: ${{ env.CONTAINER_1_TAG }}
+        # Cấu hình biến môi trường kết nối Supabase và GCS tại đây
+        env_vars: |
+          DATABASE_URL=${{ secrets.SUPABASE_DB_URL }}
+          GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}
+        flags: '--allow-unauthenticated' # Mở public nếu đây là API Public
+
+    # ---------------------------------------------------------
+    # Bạn làm tương tự cho Container 2 và Container 3 tại đây...
+    # ---------------------------------------------------------

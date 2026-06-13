@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Layout, MainContent } from '@/components/Layout'
-import { getAllTrips } from '@/lib/api'
+import { getAllTrips } from '@/app/api/endpoints'
 
 export default async function Trips() {
   const trips = await getAllTrips()

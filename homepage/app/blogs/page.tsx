@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Layout, MainContent } from '@/components/Layout'
-import { getAllBlogs } from '@/lib/api'
+import { getAllBlogs } from '@/app/api/endpoints'
 
 function slugify(text: string): string {
   return text

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Layout, MainContent } from '@/components/Layout'
-import { getAllBlogs, getBlogById } from '@/lib/api'
+import { getAllBlogs, getBlogById } from '@/app/api/endpoints'
 
 export async function generateStaticParams() {
   try {

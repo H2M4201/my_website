@@ -2,7 +2,10 @@
 
 > **Purpose:** A step-by-step guide for handling database schema changes in this project.  
 > **Stack:** Prisma ORM (SQL Server) + Express backend + Next.js frontends (homepage + adminPage)  
-> **Key Principle:** Every schema change requires **both** a database migration **and** corresponding code updates across all layers.
+> **Key Principle:** Every schema change requires **both** a database migration **and** corresponding code updates across all layers.  
+> **Critical Constraints:**
+> 1. **Never modify `backend/.env`** — Environment configuration is managed separately; manually editing `.env` can break local/dev environments.
+> 2. **Never use "delete old and create new" for table schema updates** — Always use `ALTER TABLE` / additive migrations to **preserve existing data**. Dropping and recreating tables causes **permanent data loss**.
 
 ---
 
@@ -79,6 +82,8 @@ When the database schema changes (adding/removing/renaming fields, adding/removi
 - [ ] **Check dependencies** — Does this affect other models (relations, foreign keys)?
 - [ ] **Check existing data** — Are there rows in the DB that need to be migrated?
 - [ ] **Determine nullability** — Can the new field be `NULL`? If not, what default value should existing rows get?
+- [ ] **Verify `backend/.env` is untouched** — If you see changes to `.env` in `git diff`, revert them immediately (`.env` must never be committed or modified).
+- [ ] **Verify migration approach preserves data** — The migration must use additive changes (`ALTER TABLE ADD` / `ALTER TABLE ALTER COLUMN`). Reject any approach that drops and recreates the table.
 
 ### Phase 2: Update Prisma Schema
 
@@ -964,6 +969,8 @@ npm run prisma:generate:local
 
 | Pitfall | Solution |
 |---------|----------|
+| **Modifying `backend/.env` during migration** | Never edit `.env` — environment config is managed separately. Revert any accidental `.env` changes before committing |
+| **Dropping and recreating a table instead of altering it** | Always use additive migrations (`ALTER TABLE ADD COLUMN`, etc.). Dropping + recreating wipes all existing data permanently |
 | **Forgetting to update DTOs** | Always check `backend/src/db/dtos/` after schema changes |
 | **Forgetting to update Zod schemas** | API will accept/return wrong data shapes |
 | **Forgetting to update adminPage types** | TypeScript errors in admin frontend |
@@ -993,6 +1000,14 @@ npx prisma migrate reset
 
 # View migration status
 npx prisma migrate status
+
+# === CRITICAL: Verify migration SQL for data safety ===
+# Always review migration.sql — ensure it uses ALTER TABLE, not DROP TABLE + CREATE TABLE
+# grep for "DROP TABLE" in migration SQL — if present, reject the migration
+grep -i "drop table\|drop  table" backend/prisma/migrations/*/migration.sql || echo "OK - no DROP TABLE found"
+#
+# Also verify .env was NOT modified by the migration process:
+git diff --name-only | grep -i "\.env$" && echo "WARNING: .env was modified! Revert immediately." || echo "OK - .env untouched"
 
 # Run a data migration script
 npx tsx scripts/<script-name>.ts

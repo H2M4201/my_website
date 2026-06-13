@@ -197,7 +197,23 @@ export default function LoginPage() {
                 Forgot Password?
               </button>
             </div>
-
+            
+            <div className="mt-2 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setView('change-password')
+                  setCurrentPw('')
+                  setNewPw('')
+                  setConfirmPw('')
+                  setChangeError('')
+                  setChangeSuccess('')
+                }}
+                className="text-sm text-blue-400 hover:text-blue-300 underline"
+              >
+                Change Password
+              </button>
+            </div>
             <p className="text-sm text-gray-400 text-center mt-4">
               Demo: Use username "admin" to login
             </p>

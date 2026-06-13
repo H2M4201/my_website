@@ -18,13 +18,13 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react'
-import { getAllExperiences, getAllExpertiseCategories } from '@/lib/api'
+import { getAllExperiences, getAllExpertiseCategories } from '@/app/api/endpoints'
 import type { ExperienceDTO, ExpertiseCategoryDTO } from '@/lib/dto'
 
 function ExperienceCard({ exp, index }: { exp: ExperienceDTO; index: number }) {
   const [isOpen, setIsOpen] = useState(false)
   const bgColors = ['bg-blue-600', 'bg-blue-400', 'bg-blue-200']
-  const textColors = ['text-white', 'text-white', 'text-blue-600']
+  const textColors = ['text-white', 'text-white', 'text-white']
 
   return (
     <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
@@ -38,7 +38,7 @@ function ExperienceCard({ exp, index }: { exp: ExperienceDTO; index: number }) {
             <Calendar className="w-4 h-4" /> {exp.period}
           </time>
         </div>
-        <div className="flex items-center gap-1 text-muted mb-4 text-sm font-medium">
+        <div className="flex items-center text-white gap-1 text-muted mb-4 text-sm font-medium">
           <MapPin className="w-4 h-4" /> {exp.company}
         </div>
 
@@ -56,7 +56,7 @@ function ExperienceCard({ exp, index }: { exp: ExperienceDTO; index: number }) {
         {/* Show Detail / Hide button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-1 text-sm font-medium text-accent hover:text-blue-300 transition-colors mb-2"
+          className="flex items-center gap-1 text-sm font-medium text-blue-300 hover:text-blue-400 transition-colors mb-2"
         >
           {isOpen ? (
             <>Hide Details <ChevronUp className="w-4 h-4" /></>
@@ -80,9 +80,9 @@ function ExperienceCard({ exp, index }: { exp: ExperienceDTO; index: number }) {
               <div className="mt-4 pt-4 border-t border-blue-900/30">
                 <div className="flex items-center gap-2 mb-2">
                   <Trophy className="w-4 h-4 text-yellow-500" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-muted">Key Achievement</span>
+                  <span className="text-xs font-bold uppercase text-yellow-500 tracking-wider">Key Achievement</span>
                 </div>
-                <p className="text-sm text-muted italic">{exp.achievement}</p>
+                <p className="text-sm text-muted text-white italic">{exp.achievement}</p>
               </div>
             )}
           </div>

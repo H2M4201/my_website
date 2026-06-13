@@ -50,5 +50,5 @@ COPY --from=build /app/server.js ./server.js
 
 EXPOSE 3000
 
-# Start with HTTPS via custom server.js
-CMD ["node", "server.js"]
+# Start with Next.js built-in HTTP server (Docker handles networking internally)
+CMD ["npm", "run", "start"]

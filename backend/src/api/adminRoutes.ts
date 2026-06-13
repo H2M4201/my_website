@@ -53,6 +53,9 @@ const FRONTEND_URLS = (process.env.FRONTEND_URLS || 'https://localhost:3000,http
  * Uses a fire-and-forget pattern so it doesn't block the API response.
  */
 async function revalidateFrontendCaches(resource: string): Promise<void> {
+  // Resolve the cache tag using the tag map, falling back to the resource name itself
+  const tag = RESOURCE_TAG_MAP[resource] || resource
+
   const results = await Promise.allSettled(
     FRONTEND_URLS.map(async (url) => {
       const response = await fetch(url, {
@@ -60,13 +63,13 @@ async function revalidateFrontendCaches(resource: string): Promise<void> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           secret: REVALIDATION_SECRET,
-          tag: resource,
+          tag,
         }),
       })
       if (response.ok) {
-        console.log(`[Revalidate] ✅ ${url} revalidated for "${resource}"`)
+        console.log(`[Revalidate] ✅ ${url} revalidated for "${tag}" (resource: ${resource})`)
       } else {
-        console.warn(`[Revalidate] ⚠️ ${url} returned ${response.status}`)
+        console.warn(`[Revalidate] ⚠️ ${url} returned ${response.status} for "${tag}"`)
       }
       return response
     })
@@ -75,7 +78,7 @@ async function revalidateFrontendCaches(resource: string): Promise<void> {
   results.forEach((result, index) => {
     if (result.status === 'rejected') {
       console.warn(
-        `[Revalidate] ⚠️ Failed to notify ${FRONTEND_URLS[index]} for "${resource}":`,
+        `[Revalidate] ⚠️ Failed to notify ${FRONTEND_URLS[index]} for "${tag}":`,
         result.reason?.message || result.reason
       )
     }
@@ -210,6 +213,21 @@ const resourceHandlers: Record<string, ResourceHandlers> = {
   },
 }
 
+// ===== Resource tag mapping for revalidation =====
+// Maps resource names to the cache tags used by frontends.
+// Some resources share a common tag (e.g. 'experience' and 'expertise' both use 'resume').
+const RESOURCE_TAG_MAP: Record<string, string> = {
+  section: 'sections',
+  contact: 'contacts',
+  blog: 'blogs',
+  trip: 'trips',
+  recipe: 'recipes',
+  ingredient: 'ingredients',
+  experience: 'resume',
+  expertise: 'resume',
+  'job-description': 'resume',
+}
+
 // ===== Admin CRUD Router =====
 export const adminRouter = Router()
 
@@ -276,8 +294,10 @@ adminRouter.post('/create/:resource', async (req, res) => {
     const data = handlers.createSchema.parse(req.body)
     const item = await handlers.create(data)
     const validated = handlers.responseSchema.parse(item)
-    // Fire revalidation webhooks to all frontends
-    revalidateFrontendCaches(resource)
+    // Fire revalidation webhooks to all frontends (fire-and-forget to avoid blocking response)
+    revalidateFrontendCaches(resource).catch(err =>
+      console.warn(`[Revalidate] ⚠️ Background revalidation failed for "${resource}":`, err?.message || err)
+    )
     res.status(201).json(validated)
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -302,8 +322,10 @@ adminRouter.patch('/update/:resource/:id', async (req, res) => {
     const data = handlers.updateSchema.parse(req.body)
     const item = await handlers.update(id, data)
     const validated = handlers.responseSchema.parse(item)
-    // Fire revalidation webhooks to all frontends
-    revalidateFrontendCaches(resource)
+    // Fire revalidation webhooks to all frontends (fire-and-forget to avoid blocking response)
+    revalidateFrontendCaches(resource).catch(err =>
+      console.warn(`[Revalidate] ⚠️ Background revalidation failed for "${resource}":`, err?.message || err)
+    )
     res.status(200).json(validated)
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -338,8 +360,10 @@ adminRouter.delete('/delete/:resource/:id', async (req, res) => {
   try {
     const id = handlers.idSchema.parse(req.params.id)
     await handlers.delete(id)
-    // Fire revalidation webhooks to all frontends
-    revalidateFrontendCaches(resource)
+    // Fire revalidation webhooks to all frontends (fire-and-forget to avoid blocking response)
+    revalidateFrontendCaches(resource).catch(err =>
+      console.warn(`[Revalidate] ⚠️ Background revalidation failed for "${resource}":`, err?.message || err)
+    )
     res.status(204).send()
   } catch (error) {
     if (error instanceof z.ZodError) {

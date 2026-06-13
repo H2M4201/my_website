@@ -1,12 +1,13 @@
 // ============================================
-// Prisma Schema - SQL Server (Local Development)
+// Prisma Schema - PostgreSQL (Docker / Supabase)
 // ============================================
-// This file is used for local development with SQL Server.
-// To use it, run: npm run prisma:generate:local
+// This file is the DEFAULT schema used for Docker/Supabase.
+// For local development with SQL Server, run: npm run prisma:generate:local
+// which switches to schema.sqlserver.prisma temporarily.
 // ============================================
 
 datasource db {
-  provider = "sqlserver"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -16,9 +17,9 @@ generator client {
 
 model Section {
   id          Int      @id @default(autoincrement())
-  SectionName String   @db.NVarChar(100)
-  Description String?  @db.NVarChar(500)
-  Href        String?  @db.NVarChar(255)
+  SectionName String
+  Description String?
+  Href        String?
   IsActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -28,9 +29,9 @@ model Section {
 
 model Contact {
   id          Int      @id @default(autoincrement())
-  ContactType String   @db.NVarChar(50)
-  ContactInfo String   @db.NVarChar(255)
-  Icon        String?  @db.NVarChar(100)
+  ContactType String
+  ContactInfo String
+  Icon        String?
   IsActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -40,9 +41,9 @@ model Contact {
 
 model Blog {
   id          Int      @id @default(autoincrement())
-  Title       String   @db.NVarChar(255)
-  Description String?  @db.NVarChar(1000)
-  Content     String?  @db.NVarChar(max)
+  Title       String
+  Description String?
+  Content     String?
   IsActive    Boolean  @default(true)
   SortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
@@ -53,7 +54,7 @@ model Blog {
 
 model BlogCategory {
   id           Int      @id @default(autoincrement())
-  CategoryName String   @db.NVarChar(255)
+  CategoryName String
   SortOrder    Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -63,11 +64,11 @@ model BlogCategory {
 
 model Trip {
   id          Int      @id @default(autoincrement())
-  Title       String   @db.NVarChar(255)
-  Description String?  @db.NVarChar(1000)
-  Time        String?  @db.NVarChar(100)
-  Location    String?  @db.NVarChar(255)
-  Content     String?  @db.NVarChar(max)
+  Title       String
+  Description String?
+  Time        String?
+  Location    String?
+  Content     String?
   IsActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -77,10 +78,10 @@ model Trip {
 
 model Recipe {
   id          Int      @id @default(autoincrement())
-  Name        String   @db.NVarChar(255)
-  Description String?  @db.NVarChar(1000)
-  Ingredients String?  @db.NVarChar(max)
-  Steps       String?  @db.NVarChar(max)
+  Name        String
+  Description String?
+  Ingredients String?
+  Steps       String?
   IsActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -92,7 +93,7 @@ model Recipe {
 
 model Ingredient {
   id             Int      @id @default(autoincrement())
-  IngredientName String   @db.NVarChar(255)
+  IngredientName String
   IsActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -116,10 +117,10 @@ model IngredientRecipe {
 
 model Experience {
   id          Int      @id @default(autoincrement())
-  Title       String   @db.NVarChar(255)
-  Company     String   @db.NVarChar(255)
-  Period      String   @db.NVarChar(100)
-  Achievement String?  @db.NVarChar(1000)
+  Title       String
+  Company     String
+  Period      String
+  Achievement String?
   IsActive    Boolean  @default(true)
   SortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
@@ -133,7 +134,7 @@ model Experience {
 
 model JobDescription {
   id           Int      @id @default(autoincrement())
-  Description  String   @db.NVarChar(1000)
+  Description  String
   SortOrder    Int      @default(0)
   experienceId Int
   IsActive     Boolean  @default(true)
@@ -147,7 +148,7 @@ model JobDescription {
 
 model ExperienceSkill {
   id           Int    @id @default(autoincrement())
-  Skill        String @db.NVarChar(100)
+  Skill        String
   SortOrder    Int    @default(0)
   experienceId Int
 
@@ -158,7 +159,7 @@ model ExperienceSkill {
 
 model ExpertiseCategory {
   id          Int      @id @default(autoincrement())
-  Category    String   @db.NVarChar(100)
+  Category    String
   SortOrder   Int      @default(0)
   IsActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -171,7 +172,7 @@ model ExpertiseCategory {
 
 model ExpertiseSkill {
   id                 Int      @id @default(autoincrement())
-  Skill              String   @db.NVarChar(100)
+  Skill              String
   SortOrder          Int      @default(0)
   expertiseCategoryId Int
   IsActive           Boolean  @default(true)
@@ -185,15 +186,15 @@ model ExpertiseSkill {
 
 model AdminUser {
   id                    Int       @id @default(autoincrement())
-  username              String    @unique @db.NVarChar(100)
-  password              String    @db.NVarChar(255)
-  email                 String?   @db.NVarChar(255)
-  name                  String?   @db.NVarChar(255)
+  username              String    @unique
+  password              String
+  email                 String?
+  name                  String?
   roleId                Int?
   failedLoginAttempts   Int       @default(0)
   lockedUntil           DateTime?
   passwordChangedAt     DateTime?
-  passwordResetToken    String?   @db.NVarChar(255)
+  passwordResetToken    String?
   passwordResetTokenExpires DateTime?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
