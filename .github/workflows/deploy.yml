@@ -8,7 +8,7 @@ on:
 env:
   PROJECT_ID: 'my-website-h2m' # Thay bằng GCP Project ID của bạn
   REGION: 'asia-southeast1'          # Khu vực deploy (vd: Singapore)
-  GAR_REPO: 'my-app-repo'            # Tên Artifact Registry đã tạo ở Bước 2.2
+  GAR_REPO: 'my-web-repo'            # Tên Artifact Registry đã tạo ở Bước 2.2
   
   # Thông tin Workload Identity từ Bước 2.3
   WORKLOAD_PROVIDER: 'projects/295660553920/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
