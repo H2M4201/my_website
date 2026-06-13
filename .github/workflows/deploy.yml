@@ -38,8 +38,8 @@ jobs:
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGION }}-docker.pkg.dev
-        username: _json_key
-        password: ${{ steps.auth.outputs.credentials_json }}
+        username: oauth2accesstoken  # <-- Đổi từ _json_key thành oauth2accesstoken
+        password: ${{ steps.auth.outputs.access_token }} # <-- Trỏ đúng vào output access_token
 
     # ---------------------------------------------------------
     # Giả định xử lý Container 1 (Ví dụ: API Service)
