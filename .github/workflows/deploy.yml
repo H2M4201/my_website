@@ -46,14 +46,14 @@ jobs:
         IMG_NAME: 'homepage'
       run: |
         TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/${{ env.IMG_NAME }}:${{ github.sha }}"
-        docker build -t $TAG -f ./docker/homepage/Dockerfile ./homepage
+        docker build -t $TAG -f ./docker/homepage.Dockerfile ./homepage
         docker push $TAG
         echo "CONTAINER_1_TAG=$TAG" >> $GITHUB_ENV
 
     - name: Deploy Container 1 to Cloud Run
       uses: google-github-actions/deploy-cloudrun@v2
       with:
-        service: 'api-service'
+        service: 'homepage'
         region: ${{ env.REGION }}
         image: ${{ env.CONTAINER_1_TAG }}
         # Cấu hình biến môi trường kết nối Supabase và GCS tại đây
@@ -63,5 +63,47 @@ jobs:
         flags: '--allow-unauthenticated' # Mở public nếu đây là API Public
 
     # ---------------------------------------------------------
-    # Bạn làm tương tự cho Container 2 và Container 3 tại đây...
+    # Bạn làm tương tự cho Container 2 (Ví dụ: Admin Page)
     # ---------------------------------------------------------
+    - name: Build and Push Container 2
+      env:
+        IMG_NAME: 'adminPage'
+      run: |
+        TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/${{ env.IMG_NAME }}:${{ github.sha }}"
+        docker build -t $TAG -f ./docker/adminPage.Dockerfile ./adminPage
+        docker push $TAG
+        echo "CONTAINER_2_TAG=$TAG" >> $GITHUB_ENV
+
+    - name: Deploy Container 2 to Cloud Run
+      uses: google-github-actions/deploy-cloudrun@v2
+      with:
+        service: 'adminPage'
+        region: ${{ env.REGION }}
+        image: ${{ env.CONTAINER_2_TAG }}
+        env_vars: |
+          DATABASE_URL=${{ secrets.SUPABASE_DB_URL }}
+          GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}
+        flags: '--allow-unauthenticated'
+
+  # ---------------------------------------------------------
+    # Bạn làm tương tự cho Container 3` (Ví dụ: Backend)
+    # ---------------------------------------------------------
+    - name: Build and Push Container 3
+      env:
+        IMG_NAME: 'backend'
+      run: |
+        TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/${{ env.IMG_NAME }}:${{ github.sha }}"
+        docker build -t $TAG -f ./docker/backend.Dockerfile ./backend
+        docker push $TAG
+        echo "CONTAINER_3_TAG=$TAG" >> $GITHUB_ENV
+
+    - name: Deploy Container 3 to Cloud Run
+      uses: google-github-actions/deploy-cloudrun@v2
+      with:
+        service: 'backend'
+        region: ${{ env.REGION }}
+        image: ${{ env.CONTAINER_3_TAG }}
+        env_vars: |
+          DATABASE_URL=${{ secrets.SUPABASE_DB_URL }}
+          GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}
+        flags: '--allow-unauthenticated'
