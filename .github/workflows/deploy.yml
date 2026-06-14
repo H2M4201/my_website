@@ -43,10 +43,10 @@ jobs:
     # ---------------------------------------------------------
     - name: Build and Push Container 1
       env:
-        IMG_NAME: 'api-service'
+        IMG_NAME: 'homepage'
       run: |
         TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/${{ env.IMG_NAME }}:${{ github.sha }}"
-        docker build -t $TAG -f ./services/api/Dockerfile ./services/api
+        docker build -t $TAG -f ./docker/homepage/Dockerfile ./services/homepage
         docker push $TAG
         echo "CONTAINER_1_TAG=$TAG" >> $GITHUB_ENV
 
