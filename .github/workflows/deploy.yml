@@ -56,6 +56,7 @@ jobs:
         service: 'homepage'
         region: ${{ env.REGION }}
         image: ${{ env.CONTAINER_1_TAG }}
+        port: '3000'
         # Cấu hình biến môi trường kết nối Supabase và GCS tại đây
         env_vars: |
           DATABASE_URL=${{ secrets.SUPABASE_DB_URL }}
@@ -80,6 +81,7 @@ jobs:
         service: 'admin-page'
         region: ${{ env.REGION }}
         image: ${{ env.CONTAINER_2_TAG }}
+        port: '5000'
         env_vars: |
           DATABASE_URL=${{ secrets.SUPABASE_DB_URL }}
           GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}
@@ -103,6 +105,7 @@ jobs:
         service: 'backend'
         region: ${{ env.REGION }}
         image: ${{ env.CONTAINER_3_TAG }}
+        port: '4000'
         env_vars: |
           DATABASE_URL=${{ secrets.SUPABASE_DB_URL }}
           GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}
