@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { Layout, MainContent } from '@/components/Layout'
 import { getAllTrips } from '@/app/api/endpoints'
 
+export const dynamic = 'force-dynamic'
+
 export default async function Trips() {
   const trips = await getAllTrips()
 

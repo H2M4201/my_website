@@ -12,6 +12,8 @@ import type { ContactDTO, SectionDTO } from '@/lib/dto'
  * Home page component with dynamic data from SQL Server
  * Sections and contacts are server-side fetched for better performance & SEO
  */
+export const dynamic = 'force-dynamic'
+
 export default function Home() {
   return (
     <Layout>

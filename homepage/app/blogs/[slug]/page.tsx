@@ -2,17 +2,9 @@
 
 import Link from 'next/link'
 import { Layout, MainContent } from '@/components/Layout'
-import { getAllBlogs, getBlogById } from '@/app/api/endpoints'
+import { getBlogById } from '@/app/api/endpoints'
 
-export async function generateStaticParams() {
-  try {
-    const blogs = await getAllBlogs()
-    return blogs.map((blog) => ({ slug: String(blog.id) }))
-  } catch (error) {
-    console.error('Error generating static params:', error)
-    return []
-  }
-}
+export const dynamic = 'force-dynamic'
 
 interface BlogPageProps {
   params: {

@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { Layout, MainContent } from '@/components/Layout'
 import { getAllBlogs } from '@/app/api/endpoints'
 
+export const dynamic = 'force-dynamic'
+
 function slugify(text: string): string {
   return text
     .toLowerCase()

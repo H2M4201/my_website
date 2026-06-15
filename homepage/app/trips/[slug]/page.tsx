@@ -1,16 +1,8 @@
 import Link from 'next/link'
 import { Layout, MainContent } from '@/components/Layout'
-import { getAllTrips, getTripById } from '@/app/api/endpoints'
+import { getTripById } from '@/app/api/endpoints'
 
-export async function generateStaticParams() {
-  try {
-    const trips = await getAllTrips()
-    return trips.map((trip) => ({ slug: String(trip.id) }))
-  } catch (error) {
-    console.error('Error generating static params:', error)
-    return []
-  }
-}
+export const dynamic = 'force-dynamic'
 
 interface TripPageProps {
   params: {
