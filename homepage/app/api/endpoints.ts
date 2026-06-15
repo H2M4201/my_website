@@ -41,8 +41,8 @@ export async function getAllSections(): Promise<SectionDTO[]> {
     console.log(`[Homepage] ✅ GET ${url} → ${response.status} (${Array.isArray(data) ? data.length : 1} items)`)
     return data
   } catch (error) {
-    console.error('[Homepage] getAllSections error:', error)
-    throw error
+    console.warn('[Homepage] getAllSections error (returning empty array):', error)
+    return []
   }
 }
 
@@ -89,8 +89,8 @@ export async function getAllContacts(): Promise<ContactDTO[]> {
     console.log(`[Homepage] ✅ GET ${url} → ${response.status} (${Array.isArray(data) ? data.length : 1} items)`)
     return data
   } catch (error) {
-    console.error('[Homepage] getAllContacts error:', error)
-    throw error
+    console.warn('[Homepage] getAllContacts error (returning empty array):', error)
+    return []
   }
 }
 
@@ -113,8 +113,8 @@ export async function getAllBlogs(): Promise<BlogDTO[]> {
     console.log(`[Homepage] ✅ GET ${url} → ${response.status} (${Array.isArray(data) ? data.length : 1} items)`)
     return data
   } catch (error) {
-    console.error('[Homepage] getAllBlogs error:', error)
-    throw error
+    console.warn('[Homepage] getAllBlogs error (returning empty array):', error)
+    return []
   }
 }
 
@@ -161,8 +161,8 @@ export async function getAllTrips(): Promise<TripDTO[]> {
     console.log(`[Homepage] ✅ GET ${url} → ${response.status} (${Array.isArray(data) ? data.length : 1} items)`)
     return data
   } catch (error) {
-    console.error('[Homepage] getAllTrips error:', error)
-    throw error
+    console.warn('[Homepage] getAllTrips error (returning empty array):', error)
+    return []
   }
 }
 
@@ -211,8 +211,8 @@ export async function getAllExperiences(): Promise<ExperienceDTO[]> {
     console.log(`[Homepage] ✅ GET ${url} → ${response.status} (${Array.isArray(data) ? data.length : 1} items)`)
     return data
   } catch (error) {
-    console.error('[Homepage] getAllExperiences error:', error)
-    throw error
+    console.warn('[Homepage] getAllExperiences error (returning empty array):', error)
+    return []
   }
 }
 
@@ -235,8 +235,8 @@ export async function getAllExpertiseCategories(): Promise<ExpertiseCategoryDTO[
     console.log(`[Homepage] ✅ GET ${url} → ${response.status} (${Array.isArray(data) ? data.length : 1} items)`)
     return data
   } catch (error) {
-    console.error('[Homepage] getAllExpertiseCategories error:', error)
-    throw error
+    console.warn('[Homepage] getAllExpertiseCategories error (returning empty array):', error)
+    return []
   }
 }
 

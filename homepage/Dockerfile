@@ -15,7 +15,7 @@ FROM base AS development
 # Copy source code (will be overwritten by Watch sync)
 COPY . .
 
-EXPOSE 5000
+EXPOSE 3000
 
 # Run with HTTPS via custom server.js
 CMD ["npm", "run", "dev:ssl"]
@@ -23,10 +23,14 @@ CMD ["npm", "run", "dev:ssl"]
 # ---- Production Build ----
 FROM base AS build
 
+# Accept build-time API URL (default from endpoints.ts)
+ARG NEXT_PUBLIC_API_URL=http://localhost:4000
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 # Copy source code
 COPY . .
 
-# Build Next.js app
+# Build Next.js app (gracefully handles missing API for generateStaticParams)
 RUN npm run build
 
 # ---- Production Stage ----
@@ -48,7 +52,7 @@ COPY --from=build /app/next.config.js ./
 # Copy server.js for HTTPS serving
 COPY --from=build /app/server.js ./server.js
 
-EXPOSE 5000
+EXPOSE 3000
 
 # Start with Next.js built-in HTTP server (Docker handles networking internally)
 CMD ["npm", "run", "start"]

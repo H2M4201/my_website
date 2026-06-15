@@ -4,8 +4,8 @@ services:
   # ===== Backend API =====
   backend:
     build:
-      context: .
-      dockerfile: docker/backend.Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
       target: ${DOCKER_TARGET:-production}
     container_name: mywebsite-backend
     ports:
@@ -34,9 +34,12 @@ services:
   # ===== Homepage (Public Website) =====
   homepage:
     build:
-      context: .
-      dockerfile: docker/homepage.Dockerfile
+      context: ./homepage
+      dockerfile: Dockerfile
       target: ${DOCKER_TARGET:-production}
+      args:
+        # Pass runtime API URL as build arg so Next.js can inline it
+        NEXT_PUBLIC_API_URL: http://localhost:4000
     container_name: mywebsite-homepage
     ports:
       - "3000:3000"
@@ -64,9 +67,12 @@ services:
   # ===== Admin Dashboard =====
   admin-page:
     build:
-      context: .
-      dockerfile: docker/adminPage.Dockerfile
+      context: ./adminPage
+      dockerfile: Dockerfile
       target: ${DOCKER_TARGET:-production}
+      args:
+        # Pass runtime API URL as build arg so Next.js can inline it
+        NEXT_PUBLIC_API_URL: http://localhost:4000
     container_name: mywebsite-admin
     ports:
       - "5000:5000"

@@ -39,14 +39,14 @@ jobs:
         gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
     # ---------------------------------------------------------
-    # Giả định xử lý Container 1 (Ví dụ: API Service)
+    # Container 1: Homepage (Public Website)
     # ---------------------------------------------------------
     - name: Build and Push Container 1
       env:
         IMG_NAME: 'homepage'
       run: |
         TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/${{ env.IMG_NAME }}:${{ github.sha }}"
-        docker build -t $TAG -f ./docker/homepage.Dockerfile ./homepage
+        docker build -t $TAG -f ./homepage/Dockerfile ./homepage
         docker push $TAG
         echo "CONTAINER_1_TAG=$TAG" >> $GITHUB_ENV
 
@@ -63,14 +63,14 @@ jobs:
         flags: '--allow-unauthenticated' # Mở public nếu đây là API Public
 
     # ---------------------------------------------------------
-    # Bạn làm tương tự cho Container 2 (Ví dụ: Admin Page)
+    # Container 2: Admin Page
     # ---------------------------------------------------------
     - name: Build and Push Container 2
       env:
         IMG_NAME: 'adminPage'
       run: |
         TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/${{ env.IMG_NAME }}:${{ github.sha }}"
-        docker build -t $TAG -f ./docker/adminPage.Dockerfile ./adminPage
+        docker build -t $TAG -f ./adminPage/Dockerfile ./adminPage
         docker push $TAG
         echo "CONTAINER_2_TAG=$TAG" >> $GITHUB_ENV
 
@@ -85,15 +85,15 @@ jobs:
           GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}
         flags: '--allow-unauthenticated'
 
-  # ---------------------------------------------------------
-    # Bạn làm tương tự cho Container 3` (Ví dụ: Backend)
+    # ---------------------------------------------------------
+    # Container 3: Backend API
     # ---------------------------------------------------------
     - name: Build and Push Container 3
       env:
         IMG_NAME: 'backend'
       run: |
         TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/${{ env.IMG_NAME }}:${{ github.sha }}"
-        docker build -t $TAG -f ./docker/backend.Dockerfile ./backend
+        docker build -t $TAG -f ./backend/Dockerfile ./backend
         docker push $TAG
         echo "CONTAINER_3_TAG=$TAG" >> $GITHUB_ENV
 

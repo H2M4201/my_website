@@ -4,9 +4,9 @@ This directory contains Docker configuration files to containerize the three mod
 
 | Module     | Description            | Port | Dockerfile                  |
 |------------|------------------------|------|-----------------------------|
-| **homepage**  | Public-facing website  | 3000 | `docker/homepage.Dockerfile`  |
-| **adminPage** | Admin dashboard        | 5000 | `docker/adminPage.Dockerfile` |
-| **backend**   | API server (Express)   | 4000 | `docker/backend.Dockerfile`   |
+| **homepage**  | Public-facing website  | 3000 | `homepage/Dockerfile`         |
+| **adminPage** | Admin dashboard        | 5000 | `adminPage/Dockerfile`        |
+| **backend**   | API server (Express)   | 4000 | `backend/Dockerfile`          |
 
 ## Prerequisites
 
@@ -91,13 +91,13 @@ To build and run a single service:
 
 ```bash
 # Build backend only
-docker build -f docker/backend.Dockerfile -t mywebsite-backend .
+docker build -f backend/Dockerfile -t mywebsite-backend ./backend
 
 # Build homepage only
-docker build -f docker/homepage.Dockerfile -t mywebsite-homepage .
+docker build -f homepage/Dockerfile -t mywebsite-homepage ./homepage
 
 # Build adminPage only
-docker build -f docker/adminPage.Dockerfile -t mywebsite-admin .
+docker build -f adminPage/Dockerfile -t mywebsite-admin ./adminPage
 ```
 
 ## Troubleshooting

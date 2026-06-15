@@ -1,5 +1,11 @@
 node_modules
+.agents
+.clinerules
+.cursor
+.vscode
+
 
 # Docker
 docker/.env.docker.local
 *.backup.prisma
+docker

@@ -4,7 +4,7 @@ FROM node:20-alpine AS base
 WORKDIR /app
 
 # Copy package files
-COPY homepage/package*.json ./
+COPY package*.json ./
 
 # Install ALL dependencies (including devDependencies)
 RUN npm ci
@@ -13,7 +13,7 @@ RUN npm ci
 FROM base AS development
 
 # Copy source code (will be overwritten by Watch sync)
-COPY homepage/ .
+COPY . .
 
 EXPOSE 3000
 
@@ -24,7 +24,7 @@ CMD ["npm", "run", "dev:ssl"]
 FROM base AS build
 
 # Copy source code
-COPY homepage/ .
+COPY . .
 
 # Build Next.js app
 RUN npm run build
