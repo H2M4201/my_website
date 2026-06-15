@@ -61,7 +61,7 @@ jobs:
         env_vars: |
           DATABASE_URL=${{ secrets.SUPABASE_DB_URL }}
           GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}
-        flags: '--allow-unauthenticated' # Mở public nếu đây là API Public
+        flags: '--allow-unauthenticated --port=3000' # Mở public nếu đây là API Public
 
     # ---------------------------------------------------------
     # Container 2: Admin Page
@@ -85,7 +85,7 @@ jobs:
         env_vars: |
           DATABASE_URL=${{ secrets.SUPABASE_DB_URL }}
           GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}
-        flags: '--allow-unauthenticated'
+        flags: '--allow-unauthenticated --port=5000' # Mở public nếu đây là API Public, nhớ chỉnh port nếu cần
 
     # ---------------------------------------------------------
     # Container 3: Backend API
@@ -109,4 +109,4 @@ jobs:
         env_vars: |
           DATABASE_URL=${{ secrets.SUPABASE_DB_URL }}
           GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}
-        flags: '--allow-unauthenticated'
+        flags: '--allow-unauthenticated --port=4000' # Mở public nếu đây là API Public, nhớ chỉnh port nếu cần
