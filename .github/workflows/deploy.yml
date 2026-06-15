@@ -67,7 +67,7 @@ jobs:
     # ---------------------------------------------------------
     - name: Build and Push Container 2
       env:
-        IMG_NAME: 'adminPage'
+        IMG_NAME: 'admin-page'
       run: |
         TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/${{ env.IMG_NAME }}:${{ github.sha }}"
         docker build -t $TAG -f ./adminPage/Dockerfile ./adminPage
@@ -77,7 +77,7 @@ jobs:
     - name: Deploy Container 2 to Cloud Run
       uses: google-github-actions/deploy-cloudrun@v2
       with:
-        service: 'adminPage'
+        service: 'admin-page'
         region: ${{ env.REGION }}
         image: ${{ env.CONTAINER_2_TAG }}
         env_vars: |
