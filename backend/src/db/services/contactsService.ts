@@ -5,130 +5,39 @@ import {
   UpdateContactDTO,
   ContactNotFoundError,
 } from '../dtos'
+import { createCrudService } from './crudService'
 
-function mapContactToDTO(contact: {
-  id: number
-  ContactType: string
-  ContactInfo: string
-  Icon: string | null
-  IsActive: boolean
-}): ContactDTO {
-  return {
-    id: contact.id,
-    type: contact.ContactType,
-    info: contact.ContactInfo,
-    icon: contact.Icon,
-    isActive: contact.IsActive,
-  }
-}
+const service = createCrudService<ContactDTO, CreateContactDTO, UpdateContactDTO>({
+  model: prisma.contact,
+  entityName: 'contact',
+  NotFoundError: ContactNotFoundError,
+  mapToDTO: (c) => ({
+    id: c.id,
+    type: c.ContactType,
+    info: c.ContactInfo,
+    icon: c.Icon,
+    isActive: c.IsActive,
+  }),
+  mapCreateData: (data) => ({
+    ContactType: data.type,
+    ContactInfo: data.info,
+    Icon: data.icon || null,
+    IsActive: data.isActive ?? true,
+  }),
+  mergeUpdateData: (existing, data) => ({
+    ContactType: data.type !== undefined ? data.type : existing.ContactType,
+    ContactInfo: data.info !== undefined ? data.info : existing.ContactInfo,
+    Icon: data.icon !== undefined ? data.icon : existing.Icon,
+    IsActive: data.isActive !== undefined ? data.isActive : existing.IsActive,
+  }),
+})
 
-export async function getAllContacts(): Promise<ContactDTO[]> {
-  try {
-    const contacts = await prisma.contact.findMany({
-      orderBy: { id: 'asc' },
-    })
-    return contacts.map(mapContactToDTO)
-  } catch (error) {
-    console.error('Error fetching contacts:', error)
-    throw new Error('Failed to fetch contacts from database')
-  }
-}
+export const getAllContacts = service.getAll
+export const getAllContactsIncludingInactive = service.getAllIncludingInactive
+export const getContactById = service.getById
+export const createContact = service.create
+export const updateContact = service.update
+export const deleteContact = service.delete
+export const deleteAllContacts = service.deleteAll
 
-export async function getContactById(id: number): Promise<ContactDTO> {
-  try {
-    const contact = await prisma.contact.findUnique({
-      where: { id },
-    })
-
-    if (!contact) {
-      throw new ContactNotFoundError(id)
-    }
-
-    return mapContactToDTO(contact)
-  } catch (error) {
-    if (error instanceof ContactNotFoundError) throw error
-    console.error('Error fetching contact:', error)
-    throw new Error('Failed to fetch contact from database')
-  }
-}
-
-export async function createContact(
-  data: CreateContactDTO
-): Promise<ContactDTO> {
-  try {
-    const contact = await prisma.contact.create({
-      data: {
-        ContactType: data.type,
-        ContactInfo: data.info,
-        Icon: data.icon || null,
-        IsActive: data.isActive ?? true,
-      },
-    })
-    return mapContactToDTO(contact)
-  } catch (error) {
-    console.error('Error creating contact:', error)
-    throw new Error('Failed to create contact in database')
-  }
-}
-
-export async function updateContact(
-  id: number,
-  data: UpdateContactDTO
-): Promise<ContactDTO> {
-  try {
-    const contact = await prisma.contact.findUnique({
-      where: { id },
-    })
-
-    if (!contact) {
-      throw new ContactNotFoundError(id)
-    }
-
-    const updated = await prisma.contact.update({
-      where: { id },
-      data: {
-        ContactType:
-          data.type !== undefined ? data.type : contact.ContactType,
-        ContactInfo:
-          data.info !== undefined ? data.info : contact.ContactInfo,
-        Icon: data.icon !== undefined ? data.icon : contact.Icon,
-        IsActive: data.isActive !== undefined ? data.isActive : contact.IsActive,
-      },
-    })
-
-    return mapContactToDTO(updated)
-  } catch (error) {
-    if (error instanceof ContactNotFoundError) throw error
-    console.error('Error updating contact:', error)
-    throw new Error('Failed to update contact in database')
-  }
-}
-
-export async function deleteContact(id: number): Promise<void> {
-  try {
-    const contact = await prisma.contact.findUnique({
-      where: { id },
-    })
-
-    if (!contact) {
-      throw new ContactNotFoundError(id)
-    }
-
-    await prisma.contact.delete({
-      where: { id },
-    })
-  } catch (error) {
-    if (error instanceof ContactNotFoundError) throw error
-    console.error('Error deleting contact:', error)
-    throw new Error('Failed to delete contact from database')
-  }
-}
-
-export async function deleteAllContacts(): Promise<void> {
-  try {
-    await prisma.contact.deleteMany()
-  } catch (error) {
-    console.error('Error deleting all contacts:', error)
-    throw new Error('Failed to delete all contacts from database')
-  }
-}
+export { ContactNotFoundError } from '../dtos'

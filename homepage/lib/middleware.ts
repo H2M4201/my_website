@@ -5,9 +5,12 @@ export function middleware(request: NextRequest) {
   const isHttps = proto === 'https'
   const isApiRoute = request.nextUrl.pathname.startsWith('/api/')
 
-  // Redirect HTTP to HTTPS in production
+  const isRevalidateRoute = request.nextUrl.pathname === '/api/revalidate'
+
+  // Redirect HTTP to HTTPS in production (skip revalidation webhook)
   if (
     isApiRoute &&
+    !isRevalidateRoute &&
     !isHttps &&
     process.env.NODE_ENV === 'production' &&
     process.env.ALLOW_HTTP !== 'true'

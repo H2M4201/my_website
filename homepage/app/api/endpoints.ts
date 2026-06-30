@@ -1,6 +1,7 @@
 import type {
   BlogDTO,
   TripDTO,
+  RecipeDTO,
   ContactDTO,
   SectionDTO,
   ExperienceDTO,
@@ -20,7 +21,7 @@ function getApiBaseUrl(): string {
  * Used from Server Components during SSR; `API_URL` should point to the backend from the Next server.
  */
 /** Default revalidation in seconds (fallback if webhook fails) */
-const DEFAULT_REVALIDATION = 60 // 1 minute fallback
+const DEFAULT_REVALIDATION = 5 // 5 second fallback
 
 export async function getAllSections(): Promise<SectionDTO[]> {
   try {
@@ -186,6 +187,54 @@ export async function getTripById(id: number): Promise<TripDTO> {
     return data
   } catch (error) {
     console.error('[Homepage] getTripById error:', error)
+    throw error
+  }
+}
+
+export async function getAllRecipes(): Promise<RecipeDTO[]> {
+  try {
+    const url = `${getApiBaseUrl()}/api/v1/recipes`
+
+    const response = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+      next: { tags: ['recipes'], revalidate: DEFAULT_REVALIDATION },
+    })
+    console.log(`[Homepage] 🚀 GET ${url}`)
+
+    if (!response.ok) {
+      console.error(`[Homepage] ❌ GET ${url} → ${response.status}`)
+      throw new Error(`HTTP ${response.status}: Failed to fetch recipes`)
+    }
+
+    const data = await response.json()
+    console.log(`[Homepage] ✅ GET ${url} → ${response.status} (${Array.isArray(data) ? data.length : 1} items)`)
+    return data
+  } catch (error) {
+    console.warn('[Homepage] getAllRecipes error (returning empty array):', error)
+    return []
+  }
+}
+
+export async function getRecipeById(id: number): Promise<RecipeDTO> {
+  try {
+    const url = `${getApiBaseUrl()}/api/v1/recipes/${id}`
+
+    const response = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+      next: { tags: ['recipes'], revalidate: DEFAULT_REVALIDATION },
+    })
+    console.log(`[Homepage] 🚀 GET ${url}`)
+
+    if (!response.ok) {
+      console.error(`[Homepage] ❌ GET ${url} → ${response.status}`)
+      throw new Error(`HTTP ${response.status}: Failed to fetch recipe`) 
+    }
+
+    const data = await response.json()
+    console.log(`[Homepage] ✅ GET ${url} → ${response.status}`)
+    return data
+  } catch (error) {
+    console.error('[Homepage] getRecipeById error:', error)
     throw error
   }
 }

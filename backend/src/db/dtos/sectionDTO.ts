@@ -1,3 +1,5 @@
+import { NotFoundError } from './notFoundError'
+
 export interface SectionDTO {
   id: number
   title: string
@@ -26,9 +28,9 @@ export interface UpdateSectionDTO {
   updatedAt?: Date
 }
 
-export class SectionNotFoundError extends Error {
+export class SectionNotFoundError extends NotFoundError {
   constructor(id: number) {
-    super(`Section with id ${id} not found`)
+    super('Section', id)
     this.name = 'SectionNotFoundError'
   }
 }

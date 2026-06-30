@@ -1,35 +1,11 @@
-'use client'
-
 import Link from 'next/link'
 import { Layout, MainContent } from '@/components/Layout'
+import { getAllRecipes } from '@/app/api/endpoints'
 
-export default function Recipe() {
-  const recipes = [
-    {
-      id: 1,
-      slug: 'homemade-pasta',
-      title: 'Homemade Pasta',
-      cuisine: 'Italian',
-      prep: '30 mins',
-      description: 'Fresh pasta from scratch with simple ingredients.',
-    },
-    {
-      id: 2,
-      slug: 'thai-green-curry',
-      title: 'Thai Green Curry',
-      cuisine: 'Thai',
-      prep: '20 mins',
-      description: 'Aromatic and spicy curry with fresh herbs.',
-    },
-    {
-      id: 3,
-      slug: 'chocolate-mousse',
-      title: 'Chocolate Mousse',
-      cuisine: 'French',
-      prep: '15 mins',
-      description: "Decadent dessert that's surprisingly easy to make.",
-    },
-  ]
+export const dynamic = 'force-dynamic'
+
+export default async function Recipe() {
+  const recipes = await getAllRecipes()
 
   return (
     <Layout>
@@ -46,14 +22,13 @@ export default function Recipe() {
             {recipes.map((recipe) => (
               <div key={recipe.id} className="group bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-lg hover:-translate-y-1 transition-transform duration-300">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{recipe.title}</h2>
-                  <span className="text-sm text-slate-500 dark:text-slate-400">{recipe.prep}</span>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{recipe.name}</h2>
                 </div>
-                <p className="text-slate-600 dark:text-slate-300 mb-6">{recipe.description}</p>
+                <p className="text-slate-600 dark:text-slate-300 mb-6">{recipe.description || 'No description available'}</p>
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-sm text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em]">{recipe.cuisine}</span>
+                  <span className="text-sm text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em]">Recipe</span>
                   <Link
-                    href={`/recipe/${recipe.slug}`}
+                    href={`/recipe/${recipe.id}`}
                     className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg hover:from-purple-600 hover:to-blue-700 transition-colors"
                   >
                     View Recipe

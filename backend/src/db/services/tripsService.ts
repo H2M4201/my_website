@@ -1,131 +1,49 @@
 import { prisma } from '../prisma'
-import { TripDTO, CreateTripDTO, UpdateTripDTO, TripNotFoundError } from '../dtos'
+import {
+  TripDTO,
+  CreateTripDTO,
+  UpdateTripDTO,
+  TripNotFoundError,
+} from '../dtos'
+import { createCrudService } from './crudService'
 
-function mapTripToDTO(trip: {
-  id: number
-  Title: string
-  Time: string | null
-  Location: string | null
-  Content: string | null
-  IsActive: boolean
-}): TripDTO {
-  return {
-    id: trip.id,
-    title: trip.Title,
+const service = createCrudService<TripDTO, CreateTripDTO, UpdateTripDTO>({
+  model: prisma.trip,
+  entityName: 'trip',
+  NotFoundError: TripNotFoundError,
+  mapToDTO: (t) => ({
+    id: t.id,
+    title: t.Title,
     description: null,
-    time: trip.Time,
-    location: trip.Location,
-    content: trip.Content,
-    isActive: trip.IsActive,
-  }
-}
+    time: t.Time,
+    location: t.Location,
+    content: t.Content,
+    isActive: t.IsActive,
+  }),
+  mapCreateData: (data) => ({
+    Title: data.title,
+    Description: data.description || null,
+    Time: data.time || null,
+    Location: data.location || null,
+    Content: data.content || null,
+    IsActive: data.isActive ?? true,
+  }),
+  mergeUpdateData: (existing, data) => ({
+    Title: data.title !== undefined ? data.title : existing.Title,
+    Description: data.description !== undefined ? data.description : existing.Description,
+    Time: data.time !== undefined ? data.time : existing.Time,
+    Location: data.location !== undefined ? data.location : existing.Location,
+    Content: data.content !== undefined ? data.content : existing.Content,
+    IsActive: data.isActive !== undefined ? data.isActive : existing.IsActive,
+  }),
+})
 
-export async function getAllTrips(): Promise<TripDTO[]> {
-  try {
-    const trips = await prisma.trip.findMany({
-      orderBy: { id: 'asc' },
-    })
-    return trips.map(mapTripToDTO)
-  } catch (error) {
-    console.error('Error fetching trips:', error)
-    throw new Error('Failed to fetch trips from database')
-  }
-}
+export const getAllTrips = service.getAll
+export const getAllTripsIncludingInactive = service.getAllIncludingInactive
+export const getTripById = service.getById
+export const createTrip = service.create
+export const updateTrip = service.update
+export const deleteTrip = service.delete
+export const deleteAllTrips = service.deleteAll
 
-export async function getTripById(id: number): Promise<TripDTO> {
-  try {
-    const trip = await prisma.trip.findUnique({
-      where: { id },
-    })
-
-    if (!trip) {
-      throw new TripNotFoundError(id)
-    }
-
-    return mapTripToDTO(trip)
-  } catch (error) {
-    if (error instanceof TripNotFoundError) throw error
-    console.error('Error fetching trip:', error)
-    throw new Error('Failed to fetch trip from database')
-  }
-}
-
-export async function createTrip(data: CreateTripDTO): Promise<TripDTO> {
-  try {
-    const trip = await prisma.trip.create({
-      data: {
-        Title: data.title,
-        Time: data.time || null,
-        Location: data.location || null,
-        Content: data.content || null,
-        IsActive: data.isActive ?? true,
-      },
-    })
-    return mapTripToDTO(trip)
-  } catch (error) {
-    console.error('Error creating trip:', error)
-    throw new Error('Failed to create trip in database')
-  }
-}
-
-export async function updateTrip(
-  id: number,
-  data: UpdateTripDTO
-): Promise<TripDTO> {
-  try {
-    const trip = await prisma.trip.findUnique({
-      where: { id },
-    })
-
-    if (!trip) {
-      throw new TripNotFoundError(id)
-    }
-
-    const updated = await prisma.trip.update({
-      where: { id },
-      data: {
-        Title: data.title !== undefined ? data.title : trip.Title,
-        Time: data.time !== undefined ? data.time : trip.Time,
-        Location:
-          data.location !== undefined ? data.location : trip.Location,
-        Content: data.content !== undefined ? data.content : trip.Content,
-        IsActive: data.isActive !== undefined ? data.isActive : trip.IsActive,
-      },
-    })
-
-    return mapTripToDTO(updated)
-  } catch (error) {
-    if (error instanceof TripNotFoundError) throw error
-    console.error('Error updating trip:', error)
-    throw new Error('Failed to update trip in database')
-  }
-}
-
-export async function deleteTrip(id: number): Promise<void> {
-  try {
-    const trip = await prisma.trip.findUnique({
-      where: { id },
-    })
-
-    if (!trip) {
-      throw new TripNotFoundError(id)
-    }
-
-    await prisma.trip.delete({
-      where: { id },
-    })
-  } catch (error) {
-    if (error instanceof TripNotFoundError) throw error
-    console.error('Error deleting trip:', error)
-    throw new Error('Failed to delete trip from database')
-  }
-}
-
-export async function deleteAllTrips(): Promise<void> {
-  try {
-    await prisma.trip.deleteMany()
-  } catch (error) {
-    console.error('Error deleting all trips:', error)
-    throw new Error('Failed to delete all trips from database')
-  }
-}
+export { TripNotFoundError } from '../dtos'

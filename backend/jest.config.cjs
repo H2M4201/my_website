@@ -9,4 +9,5 @@ module.exports = {
   },
   collectCoverageFrom: ['src/**/*.ts', '!src/index.ts', '!src/**/__tests__/**'],
   clearMocks: true,
+  setupFiles: ['<rootDir>/src/__tests__/setup.ts'],
 }

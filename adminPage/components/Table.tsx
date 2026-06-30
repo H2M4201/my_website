@@ -22,6 +22,7 @@ interface TableProps<T extends { id: number }> {
   isLoading?: boolean
   onToggleActive?: (item: T) => void
   getIsActive?: (item: T) => boolean
+  onToggleSuccess?: () => void
 }
 
 export function Table<T extends { id: number }>({
@@ -33,6 +34,7 @@ export function Table<T extends { id: number }>({
   isLoading,
   onToggleActive,
   getIsActive,
+  onToggleSuccess,
 }: TableProps<T>) {
   const [togglingId, setTogglingId] = useState<number | null>(null)
 
@@ -55,6 +57,7 @@ export function Table<T extends { id: number }>({
     setTogglingId(item.id)
     try {
       await updateItem(resource, item.id, { isActive: !effectiveGetIsActive(item) })
+      onToggleSuccess?.()
     } catch (err) {
       console.error('Failed to toggle active status:', err)
     } finally {

@@ -32,6 +32,15 @@ export interface TripDTO {
   isActive: boolean
 }
 
+export interface RecipeDTO {
+  id: number
+  name: string
+  description: string | null
+  ingredients: string | null
+  steps: string | null
+  isActive: boolean
+}
+
 // ===== Resume DTOs =====
 
 export interface JobDescriptionDTO {

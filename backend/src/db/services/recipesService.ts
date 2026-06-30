@@ -5,139 +5,42 @@ import {
   UpdateRecipeDTO,
   RecipeNotFoundError,
 } from '../dtos'
+import { createCrudService } from './crudService'
 
-function mapRecipeToDTO(recipe: {
-  id: number
-  Name: string
-  Description: string | null
-  Ingredients: string | null
-  Steps: string | null
-  IsActive: boolean
-}): RecipeDTO {
-  return {
-    id: recipe.id,
-    name: recipe.Name,
-    description: recipe.Description,
-    ingredients: recipe.Ingredients,
-    steps: recipe.Steps,
-    isActive: recipe.IsActive,
-  }
-}
+const service = createCrudService<RecipeDTO, CreateRecipeDTO, UpdateRecipeDTO>({
+  model: prisma.recipe,
+  entityName: 'recipe',
+  NotFoundError: RecipeNotFoundError,
+  mapToDTO: (r) => ({
+    id: r.id,
+    name: r.Name,
+    description: r.Description,
+    ingredients: r.Ingredients,
+    steps: r.Steps,
+    isActive: r.IsActive,
+  }),
+  mapCreateData: (data) => ({
+    Name: data.name,
+    Description: data.description || null,
+    Ingredients: data.ingredients || null,
+    Steps: data.steps || null,
+    IsActive: data.isActive ?? true,
+  }),
+  mergeUpdateData: (existing, data) => ({
+    Name: data.name !== undefined ? data.name : existing.Name,
+    Description: data.description !== undefined ? data.description : existing.Description,
+    Ingredients: data.ingredients !== undefined ? data.ingredients : existing.Ingredients,
+    Steps: data.steps !== undefined ? data.steps : existing.Steps,
+    IsActive: data.isActive !== undefined ? data.isActive : existing.IsActive,
+  }),
+})
 
-export async function getAllRecipes(): Promise<RecipeDTO[]> {
-  try {
-    const recipes = await prisma.recipe.findMany({
-      orderBy: { id: 'asc' },
-    })
-    return recipes.map((r) => mapRecipeToDTO(r as any))
-  } catch (error) {
-    console.error('Error fetching recipes:', error)
-    throw new Error('Failed to fetch recipes from database')
-  }
-}
+export const getAllRecipes = service.getAll
+export const getAllRecipesIncludingInactive = service.getAllIncludingInactive
+export const getRecipeById = service.getById
+export const createRecipe = service.create
+export const updateRecipe = service.update
+export const deleteRecipe = service.delete
+export const deleteAllRecipes = service.deleteAll
 
-export async function getRecipeById(id: number): Promise<RecipeDTO> {
-  try {
-    const recipe = await prisma.recipe.findUnique({
-      where: { id },
-    })
-
-    if (!recipe) {
-      throw new RecipeNotFoundError(id)
-    }
-
-    return mapRecipeToDTO(recipe as any)
-  } catch (error) {
-    if (error instanceof RecipeNotFoundError) throw error
-    console.error('Error fetching recipe:', error)
-    throw new Error('Failed to fetch recipe from database')
-  }
-}
-
-export async function createRecipe(data: CreateRecipeDTO): Promise<RecipeDTO> {
-  try {
-    const recipe = await prisma.recipe.create({
-      data: {
-        Name: data.name,
-        Description: data.description || null,
-        Ingredients: data.ingredients || null,
-        Steps: data.steps || null,
-        IsActive: data.isActive ?? true,
-      },
-    })
-    return mapRecipeToDTO(recipe as any)
-  } catch (error) {
-    console.error('Error creating recipe:', error)
-    throw new Error('Failed to create recipe in database')
-  }
-}
-
-export async function updateRecipe(
-  id: number,
-  data: UpdateRecipeDTO
-): Promise<RecipeDTO> {
-  try {
-    const recipe = await prisma.recipe.findUnique({
-      where: { id },
-    })
-
-    if (!recipe) {
-      throw new RecipeNotFoundError(id)
-    }
-
-    const updated = await prisma.recipe.update({
-      where: { id },
-      data: {
-        Name: data.name !== undefined ? data.name : (recipe as any).Name,
-        Description:
-          data.description !== undefined
-            ? data.description
-            : (recipe as any).Description,
-        Ingredients:
-          data.ingredients !== undefined
-            ? data.ingredients
-            : (recipe as any).Ingredients,
-        Steps:
-          data.steps !== undefined
-            ? data.steps
-            : (recipe as any).Steps,
-        IsActive: data.isActive !== undefined ? data.isActive : (recipe as any).IsActive,
-      },
-    })
-
-    return mapRecipeToDTO(updated as any)
-  } catch (error) {
-    if (error instanceof RecipeNotFoundError) throw error
-    console.error('Error updating recipe:', error)
-    throw new Error('Failed to update recipe in database')
-  }
-}
-
-export async function deleteRecipe(id: number): Promise<void> {
-  try {
-    const recipe = await prisma.recipe.findUnique({
-      where: { id },
-    })
-
-    if (!recipe) {
-      throw new RecipeNotFoundError(id)
-    }
-
-    await prisma.recipe.delete({
-      where: { id },
-    })
-  } catch (error) {
-    if (error instanceof RecipeNotFoundError) throw error
-    console.error('Error deleting recipe:', error)
-    throw new Error('Failed to delete recipe from database')
-  }
-}
-
-export async function deleteAllRecipes(): Promise<void> {
-  try {
-    await prisma.recipe.deleteMany()
-  } catch (error) {
-    console.error('Error deleting all recipes:', error)
-    throw new Error('Failed to delete all recipes from database')
-  }
-}
+export { RecipeNotFoundError } from '../dtos'

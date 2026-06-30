@@ -96,24 +96,26 @@ export interface CreateExpertiseSkillDTO {
   sortOrder?: number
 }
 
+import { NotFoundError } from './notFoundError'
+
 // ===== Error Classes =====
-export class ExperienceNotFoundError extends Error {
+export class ExperienceNotFoundError extends NotFoundError {
   constructor(id: number) {
-    super(`Experience with id ${id} not found`)
+    super('Experience', id)
     this.name = 'ExperienceNotFoundError'
   }
 }
 
-export class ExpertiseCategoryNotFoundError extends Error {
+export class ExpertiseCategoryNotFoundError extends NotFoundError {
   constructor(id: number) {
-    super(`ExpertiseCategory with id ${id} not found`)
+    super('ExpertiseCategory', id)
     this.name = 'ExpertiseCategoryNotFoundError'
   }
 }
 
-export class JobDescriptionNotFoundError extends Error {
+export class JobDescriptionNotFoundError extends NotFoundError {
   constructor(id: number) {
-    super(`JobDescription with id ${id} not found`)
+    super('JobDescription', id)
     this.name = 'JobDescriptionNotFoundError'
   }
 }

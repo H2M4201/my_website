@@ -219,6 +219,22 @@ function mapExpertiseCategory(cat: any): ExpertiseCategoryDTO {
 export async function getAllExpertiseCategories(): Promise<ExpertiseCategoryDTO[]> {
   try {
     const categories = await prisma.expertiseCategory.findMany({
+      where: { IsActive: true },
+      orderBy: { SortOrder: 'asc' },
+      include: {
+        skills: { orderBy: { SortOrder: 'asc' } },
+      },
+    })
+    return categories.map(mapExpertiseCategory)
+  } catch (error) {
+    console.error('Error fetching expertise categories:', error)
+    throw new Error('Failed to fetch expertise categories')
+  }
+}
+
+export async function getAllExpertiseCategoriesIncludingInactive(): Promise<ExpertiseCategoryDTO[]> {
+  try {
+    const categories = await prisma.expertiseCategory.findMany({
       orderBy: { SortOrder: 'asc' },
       include: {
         skills: { orderBy: { SortOrder: 'asc' } },
@@ -343,6 +359,24 @@ export async function deleteAllExpertiseCategories(): Promise<void> {
 // ============================================================
 
 export async function getAllJobDescriptions(): Promise<JobDescriptionDTO[]> {
+  try {
+    const items = await prisma.jobDescription.findMany({
+      where: { IsActive: true },
+      orderBy: [{ experienceId: 'asc' }, { SortOrder: 'asc' }],
+    })
+    return items.map(jd => ({
+      id: jd.id,
+      description: jd.Description,
+      sortOrder: jd.SortOrder,
+      experienceId: jd.experienceId,
+    }))
+  } catch (error) {
+    console.error('Error fetching job descriptions:', error)
+    throw new Error('Failed to fetch job descriptions')
+  }
+}
+
+export async function getAllJobDescriptionsIncludingInactive(): Promise<JobDescriptionDTO[]> {
   try {
     const items = await prisma.jobDescription.findMany({
       orderBy: [{ experienceId: 'asc' }, { SortOrder: 'asc' }],

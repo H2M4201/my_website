@@ -1,32 +1,33 @@
 import { Router } from 'express'
 import { z } from 'zod'
 import {
-  getAllSections, getSectionById, createSection, updateSection, deleteSection, SectionNotFoundError,
+  getAllSectionsIncludingInactive, getSectionById, createSection, updateSection, deleteSection,
 } from '../db'
 import {
-  getAllContacts, getContactById, createContact, updateContact, deleteContact, ContactNotFoundError,
+  getAllContactsIncludingInactive, getContactById, createContact, updateContact, deleteContact,
 } from '../db'
 import {
-  getAllBlogs, getBlogById, createBlog, updateBlog, deleteBlog, BlogNotFoundError,
+  getAllBlogsIncludingInactive, getBlogById, createBlog, updateBlog, deleteBlog,
 } from '../db'
 import {
-  getAllTrips, getTripById, createTrip, updateTrip, deleteTrip, TripNotFoundError,
+  getAllTripsIncludingInactive, getTripById, createTrip, updateTrip, deleteTrip,
 } from '../db'
 import {
-  getAllRecipes, getRecipeById, createRecipe, updateRecipe, deleteRecipe, RecipeNotFoundError,
+  getAllRecipesIncludingInactive, getRecipeById, createRecipe, updateRecipe, deleteRecipe,
 } from '../db'
 import {
-  getAllIngredients, getIngredientById, createIngredient, updateIngredient, deleteIngredient, IngredientNotFoundError,
+  getAllIngredientsIncludingInactive, getIngredientById, createIngredient, updateIngredient, deleteIngredient,
 } from '../db'
 import {
-  getAllExperiences, getExperienceById, createExperience, updateExperience, deleteExperience, ExperienceNotFoundError,
+  getAllExperiences, getExperienceById, createExperience, updateExperience, deleteExperience,
 } from '../db'
 import {
-  getAllExpertiseCategories, getExpertiseCategoryById, createExpertiseCategory, updateExpertiseCategory, deleteExpertiseCategory, ExpertiseCategoryNotFoundError,
+  getAllExpertiseCategoriesIncludingInactive, getExpertiseCategoryById, createExpertiseCategory, updateExpertiseCategory, deleteExpertiseCategory,
 } from '../db'
 import {
-  getAllJobDescriptions, getJobDescriptionById, createJobDescription, updateJobDescription, deleteJobDescription, JobDescriptionNotFoundError,
+  getAllJobDescriptionsIncludingInactive, getJobDescriptionById, createJobDescription, updateJobDescription, deleteJobDescription,
 } from '../db'
+import { NotFoundError } from '../db'
 import {
   sectionIdParamSchema, createSectionRequestSchema, updateSectionRequestSchema, sectionResponseSchema,
   contactIdParamSchema, createContactRequestSchema, updateContactRequestSchema, contactResponseSchema,
@@ -38,22 +39,33 @@ import {
   expertiseCategoryIdParamSchema, createExpertiseCategoryRequestSchema, updateExpertiseCategoryRequestSchema, expertiseCategoryResponseSchema,
   jobDescriptionIdParamSchema, createJobDescriptionRequestSchema, updateJobDescriptionRequestSchema, jobDescriptionResponseSchema,
 } from './schemas'
+import { requireAuth } from './middleware/auth'
+import type { AuthenticatedRequest } from './middleware/auth'
+import { csrfProtection } from './middleware/csrf'
+import { requireJsonContentType } from './middleware/contentType'
+import { sanitizeInput } from './middleware/sanitize'
+import { getAllowedOrigins } from '../app'
 
-// ===== Shared secret for frontend revalidation webhooks =====
-const REVALIDATION_SECRET = process.env.REVALIDATION_SECRET || 'dev-secret-change-in-production'
+const REVALIDATION_SECRET = (() => {
+  const secret = process.env.REVALIDATION_SECRET
+  if (!secret) {
+    throw new Error('FATAL: REVALIDATION_SECRET environment variable is required')
+  }
+  return secret
+})()
 
-/** List of frontend URLs to notify after admin CRUD operations */
 const FRONTEND_URLS = (process.env.FRONTEND_URLS || 'https://localhost:3000,https://localhost:5000')
   .split(',')
-  .map(url => `${url.trim().replace(/\/$/, '')}/api/revalidate`)
+  .flatMap(url => {
+    const trimmed = url.trim().replace(/\/$/, '')
+    const base = trimmed.replace(/^https?:\/\//, '')
+    return [
+      `http://${base}/api/revalidate`,
+      `http://${base}/api/revalidate`,
+    ]
+  })
 
-/**
- * Sends a POST request to ALL frontend revalidation endpoints after any admin CRUD operation.
- * This ensures all frontends (homepage, adminPage) reflect changes in real time.
- * Uses a fire-and-forget pattern so it doesn't block the API response.
- */
 async function revalidateFrontendCaches(resource: string): Promise<void> {
-  // Resolve the cache tag using the tag map, falling back to the resource name itself
   const tag = RESOURCE_TAG_MAP[resource] || resource
 
   const results = await Promise.allSettled(
@@ -65,11 +77,12 @@ async function revalidateFrontendCaches(resource: string): Promise<void> {
           secret: REVALIDATION_SECRET,
           tag,
         }),
+        signal: AbortSignal.timeout(5000),
       })
       if (response.ok) {
-        console.log(`[Revalidate] ✅ ${url} revalidated for "${tag}" (resource: ${resource})`)
+        console.log(`[Revalidate] ${url} revalidated for "${tag}" (resource: ${resource})`)
       } else {
-        console.warn(`[Revalidate] ⚠️ ${url} returned ${response.status} for "${tag}"`)
+        console.warn(`[Revalidate] ${url} returned ${response.status} for "${tag}"`)
       }
       return response
     })
@@ -78,17 +91,15 @@ async function revalidateFrontendCaches(resource: string): Promise<void> {
   results.forEach((result, index) => {
     if (result.status === 'rejected') {
       console.warn(
-        `[Revalidate] ⚠️ Failed to notify ${FRONTEND_URLS[index]} for "${tag}":`,
+        `[Revalidate] Failed to notify ${FRONTEND_URLS[index]} for "${tag}":`,
         result.reason?.message || result.reason
       )
     }
   })
 }
 
-// ===== Centralized admin API prefix =====
 export const ADMIN_API_PREFIX = '/api/v1/admin'
 
-// ===== Resource router map =====
 type ResourceHandlers = {
   getAll: () => Promise<any[]>
   getById: (id: number) => Promise<any>
@@ -99,12 +110,11 @@ type ResourceHandlers = {
   createSchema: z.ZodSchema
   updateSchema: z.ZodSchema
   responseSchema: z.ZodSchema
-  notFoundError: new (id: number) => Error
 }
 
 const resourceHandlers: Record<string, ResourceHandlers> = {
   section: {
-    getAll: getAllSections,
+    getAll: getAllSectionsIncludingInactive,
     getById: getSectionById,
     create: createSection,
     update: updateSection,
@@ -113,10 +123,9 @@ const resourceHandlers: Record<string, ResourceHandlers> = {
     createSchema: createSectionRequestSchema,
     updateSchema: updateSectionRequestSchema,
     responseSchema: sectionResponseSchema,
-    notFoundError: SectionNotFoundError,
   },
   contact: {
-    getAll: getAllContacts,
+    getAll: getAllContactsIncludingInactive,
     getById: getContactById,
     create: createContact,
     update: updateContact,
@@ -125,10 +134,9 @@ const resourceHandlers: Record<string, ResourceHandlers> = {
     createSchema: createContactRequestSchema,
     updateSchema: updateContactRequestSchema,
     responseSchema: contactResponseSchema,
-    notFoundError: ContactNotFoundError,
   },
   blog: {
-    getAll: getAllBlogs,
+    getAll: getAllBlogsIncludingInactive,
     getById: getBlogById,
     create: createBlog,
     update: updateBlog,
@@ -137,10 +145,9 @@ const resourceHandlers: Record<string, ResourceHandlers> = {
     createSchema: createBlogRequestSchema,
     updateSchema: updateBlogRequestSchema,
     responseSchema: blogResponseSchema,
-    notFoundError: BlogNotFoundError,
   },
   trip: {
-    getAll: getAllTrips,
+    getAll: getAllTripsIncludingInactive,
     getById: getTripById,
     create: createTrip,
     update: updateTrip,
@@ -149,10 +156,9 @@ const resourceHandlers: Record<string, ResourceHandlers> = {
     createSchema: createTripRequestSchema,
     updateSchema: updateTripRequestSchema,
     responseSchema: tripResponseSchema,
-    notFoundError: TripNotFoundError,
   },
   recipe: {
-    getAll: getAllRecipes,
+    getAll: getAllRecipesIncludingInactive,
     getById: getRecipeById,
     create: createRecipe,
     update: updateRecipe,
@@ -161,10 +167,9 @@ const resourceHandlers: Record<string, ResourceHandlers> = {
     createSchema: createRecipeRequestSchema,
     updateSchema: updateRecipeRequestSchema,
     responseSchema: recipeResponseSchema,
-    notFoundError: RecipeNotFoundError,
   },
   ingredient: {
-    getAll: getAllIngredients,
+    getAll: getAllIngredientsIncludingInactive,
     getById: getIngredientById,
     create: createIngredient,
     update: updateIngredient,
@@ -173,7 +178,6 @@ const resourceHandlers: Record<string, ResourceHandlers> = {
     createSchema: createIngredientRequestSchema,
     updateSchema: updateIngredientRequestSchema,
     responseSchema: ingredientResponseSchema,
-    notFoundError: IngredientNotFoundError,
   },
   experience: {
     getAll: () => getAllExperiences(true),
@@ -185,10 +189,9 @@ const resourceHandlers: Record<string, ResourceHandlers> = {
     createSchema: createExperienceRequestSchema,
     updateSchema: updateExperienceRequestSchema,
     responseSchema: experienceResponseSchema,
-    notFoundError: ExperienceNotFoundError,
   },
   expertise: {
-    getAll: getAllExpertiseCategories,
+    getAll: getAllExpertiseCategoriesIncludingInactive,
     getById: getExpertiseCategoryById,
     create: createExpertiseCategory,
     update: updateExpertiseCategory,
@@ -197,10 +200,9 @@ const resourceHandlers: Record<string, ResourceHandlers> = {
     createSchema: createExpertiseCategoryRequestSchema,
     updateSchema: updateExpertiseCategoryRequestSchema,
     responseSchema: expertiseCategoryResponseSchema,
-    notFoundError: ExpertiseCategoryNotFoundError,
   },
   'job-description': {
-    getAll: getAllJobDescriptions,
+    getAll: getAllJobDescriptionsIncludingInactive,
     getById: getJobDescriptionById,
     create: createJobDescription,
     update: updateJobDescription,
@@ -209,13 +211,9 @@ const resourceHandlers: Record<string, ResourceHandlers> = {
     createSchema: createJobDescriptionRequestSchema,
     updateSchema: updateJobDescriptionRequestSchema,
     responseSchema: jobDescriptionResponseSchema,
-    notFoundError: JobDescriptionNotFoundError,
   },
 }
 
-// ===== Resource tag mapping for revalidation =====
-// Maps resource names to the cache tags used by frontends.
-// Some resources share a common tag (e.g. 'experience' and 'expertise' both use 'resume').
 const RESOURCE_TAG_MAP: Record<string, string> = {
   section: 'sections',
   contact: 'contacts',
@@ -228,11 +226,15 @@ const RESOURCE_TAG_MAP: Record<string, string> = {
   'job-description': 'resume',
 }
 
-// ===== Admin CRUD Router =====
 export const adminRouter = Router()
 
+adminRouter.use(csrfProtection(getAllowedOrigins()))
+adminRouter.use(requireJsonContentType)
+adminRouter.use(requireAuth)
+adminRouter.use(sanitizeInput)
+
 // GET /api/v1/admin/{resource} - List all
-adminRouter.get('/:resource', async (req, res) => {
+adminRouter.get('/:resource', async (req: AuthenticatedRequest, res) => {
   const { resource } = req.params
   const handlers = resourceHandlers[resource]
   if (!handlers) {
@@ -249,7 +251,7 @@ adminRouter.get('/:resource', async (req, res) => {
 })
 
 // GET /api/v1/admin/{resource}/{id} - Get one
-adminRouter.get('/:resource/:id', async (req, res) => {
+adminRouter.get('/:resource/:id', async (req: AuthenticatedRequest, res) => {
   const { resource } = req.params
   const handlers = resourceHandlers[resource]
   if (!handlers) {
@@ -265,15 +267,7 @@ adminRouter.get('/:resource/:id', async (req, res) => {
       res.status(400).json({ error: 'Invalid ID' })
       return
     }
-    if (error instanceof SectionNotFoundError ||
-        error instanceof ContactNotFoundError ||
-        error instanceof BlogNotFoundError ||
-        error instanceof TripNotFoundError ||
-        error instanceof RecipeNotFoundError ||
-        error instanceof IngredientNotFoundError ||
-        error instanceof ExperienceNotFoundError ||
-        error instanceof ExpertiseCategoryNotFoundError ||
-        error instanceof JobDescriptionNotFoundError) {
+    if (error instanceof NotFoundError) {
       res.status(404).json({ error: (error as Error).message })
       return
     }
@@ -283,7 +277,7 @@ adminRouter.get('/:resource/:id', async (req, res) => {
 })
 
 // POST /api/v1/admin/create/{resource} - Create
-adminRouter.post('/create/:resource', async (req, res) => {
+adminRouter.post('/create/:resource', async (req: AuthenticatedRequest, res) => {
   const { resource } = req.params
   const handlers = resourceHandlers[resource]
   if (!handlers) {
@@ -294,14 +288,13 @@ adminRouter.post('/create/:resource', async (req, res) => {
     const data = handlers.createSchema.parse(req.body)
     const item = await handlers.create(data)
     const validated = handlers.responseSchema.parse(item)
-    // Fire revalidation webhooks to all frontends (fire-and-forget to avoid blocking response)
     revalidateFrontendCaches(resource).catch(err =>
-      console.warn(`[Revalidate] ⚠️ Background revalidation failed for "${resource}":`, err?.message || err)
+      console.warn(`[Revalidate] Background revalidation failed for "${resource}":`, err?.message || err)
     )
     res.status(201).json(validated)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Validation failed', details: error.errors })
+      res.status(400).json({ error: 'Validation failed' })
       return
     }
     console.error(`POST /admin/create/${resource} error:`, error)
@@ -310,7 +303,7 @@ adminRouter.post('/create/:resource', async (req, res) => {
 })
 
 // PATCH /api/v1/admin/update/{resource}/{id} - Update
-adminRouter.patch('/update/:resource/:id', async (req, res) => {
+adminRouter.patch('/update/:resource/:id', async (req: AuthenticatedRequest, res) => {
   const { resource } = req.params
   const handlers = resourceHandlers[resource]
   if (!handlers) {
@@ -322,25 +315,16 @@ adminRouter.patch('/update/:resource/:id', async (req, res) => {
     const data = handlers.updateSchema.parse(req.body)
     const item = await handlers.update(id, data)
     const validated = handlers.responseSchema.parse(item)
-    // Fire revalidation webhooks to all frontends (fire-and-forget to avoid blocking response)
     revalidateFrontendCaches(resource).catch(err =>
-      console.warn(`[Revalidate] ⚠️ Background revalidation failed for "${resource}":`, err?.message || err)
+      console.warn(`[Revalidate] Background revalidation failed for "${resource}":`, err?.message || err)
     )
     res.status(200).json(validated)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Validation failed', details: error.errors })
+      res.status(400).json({ error: 'Validation failed' })
       return
     }
-    if (error instanceof SectionNotFoundError ||
-        error instanceof ContactNotFoundError ||
-        error instanceof BlogNotFoundError ||
-        error instanceof TripNotFoundError ||
-        error instanceof RecipeNotFoundError ||
-        error instanceof IngredientNotFoundError ||
-        error instanceof ExperienceNotFoundError ||
-        error instanceof ExpertiseCategoryNotFoundError ||
-        error instanceof JobDescriptionNotFoundError) {
+    if (error instanceof NotFoundError) {
       res.status(404).json({ error: (error as Error).message })
       return
     }
@@ -350,7 +334,7 @@ adminRouter.patch('/update/:resource/:id', async (req, res) => {
 })
 
 // DELETE /api/v1/admin/delete/{resource}/{id} - Delete
-adminRouter.delete('/delete/:resource/:id', async (req, res) => {
+adminRouter.delete('/delete/:resource/:id', async (req: AuthenticatedRequest, res) => {
   const { resource } = req.params
   const handlers = resourceHandlers[resource]
   if (!handlers) {
@@ -360,9 +344,8 @@ adminRouter.delete('/delete/:resource/:id', async (req, res) => {
   try {
     const id = handlers.idSchema.parse(req.params.id)
     await handlers.delete(id)
-    // Fire revalidation webhooks to all frontends (fire-and-forget to avoid blocking response)
     revalidateFrontendCaches(resource).catch(err =>
-      console.warn(`[Revalidate] ⚠️ Background revalidation failed for "${resource}":`, err?.message || err)
+      console.warn(`[Revalidate] Background revalidation failed for "${resource}":`, err?.message || err)
     )
     res.status(204).send()
   } catch (error) {
@@ -370,15 +353,7 @@ adminRouter.delete('/delete/:resource/:id', async (req, res) => {
       res.status(400).json({ error: 'Invalid ID' })
       return
     }
-    if (error instanceof SectionNotFoundError ||
-        error instanceof ContactNotFoundError ||
-        error instanceof BlogNotFoundError ||
-        error instanceof TripNotFoundError ||
-        error instanceof RecipeNotFoundError ||
-        error instanceof IngredientNotFoundError ||
-        error instanceof ExperienceNotFoundError ||
-        error instanceof ExpertiseCategoryNotFoundError ||
-        error instanceof JobDescriptionNotFoundError) {
+    if (error instanceof NotFoundError) {
       res.status(404).json({ error: (error as Error).message })
       return
     }

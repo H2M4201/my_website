@@ -26,7 +26,7 @@ resumeRouter.get('/experiences', async (_req, res) => {
     const validated = experiencesListResponseSchema.parse(experiences)
     res.status(200).set({
       'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=300',
+      'Cache-Control': 'no-store',
     })
     res.json(validated)
   } catch (error) {
@@ -48,7 +48,7 @@ resumeRouter.get('/experiences/:id', async (req, res) => {
     const validated = experienceResponseSchema.parse(experience)
     res.status(200).set({
       'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=300',
+      'Cache-Control': 'no-store',
     })
     res.json(validated)
   } catch (error) {
@@ -72,7 +72,7 @@ resumeRouter.get('/expertise', async (_req, res) => {
     const validated = expertiseCategoriesListResponseSchema.parse(categories)
     res.status(200).set({
       'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=300',
+      'Cache-Control': 'no-store',
     })
     res.json(validated)
   } catch (error) {
@@ -93,7 +93,7 @@ resumeRouter.get('/expertise/:id', async (req, res) => {
     const validated = expertiseCategoryResponseSchema.parse(category)
     res.status(200).set({
       'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=300',
+      'Cache-Control': 'no-store',
     })
     res.json(validated)
   } catch (error) {

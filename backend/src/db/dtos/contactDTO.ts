@@ -1,3 +1,5 @@
+import { NotFoundError } from './notFoundError'
+
 export interface ContactDTO {
   id: number
   type: string
@@ -20,9 +22,9 @@ export interface UpdateContactDTO {
   isActive?: boolean
 }
 
-export class ContactNotFoundError extends Error {
+export class ContactNotFoundError extends NotFoundError {
   constructor(id: number) {
-    super(`Contact with id ${id} not found`)
+    super('Contact', id)
     this.name = 'ContactNotFoundError'
   }
 }

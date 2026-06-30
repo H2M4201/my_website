@@ -67,29 +67,24 @@ async function main() {
 
   console.log(`✓ Created ${contacts.count} contacts`)
 
-  // Seed admin user (upsert to avoid duplicates on re-seed)
+  // Seed admin user (findUnique + create to avoid duplicates on re-seed)
   console.log('Creating admin user...')
   const hashedPassword = bcrypt.hashSync('admin123', 10)
-  
-  // Check if admin user already exists
-  const existingUser = await prisma.$queryRawUnsafe<Array<{ id: number }>>(
-    'SELECT id FROM AdminUser WHERE username = @P1',
-    'admin'
-  )
-  
-  if (existingUser.length === 0) {
-    const now = new Date().toISOString()
-    const adminUser = await prisma.$executeRawUnsafe(
-      'INSERT INTO AdminUser (username, password, email, name, passwordChangedAt, createdAt, updatedAt, failedLoginAttempts) VALUES (@P1, @P2, @P3, @P4, @P5, @P6, @P7, @P8)',
-      'admin',
-      hashedPassword,
-      'admin@example.com',
-      'Administrator',
-      now,
-      now,
-      now,
-      0
-    )
+
+  const existingUser = await prisma.adminUser.findUnique({
+    where: { username: 'admin' },
+  })
+
+  if (!existingUser) {
+    await prisma.adminUser.create({
+      data: {
+        username: 'admin',
+        password: hashedPassword,
+        email: 'admin@example.com',
+        name: 'Administrator',
+        passwordChangedAt: new Date(),
+      },
+    })
     console.log('✓ Admin user created (username: admin, password: admin123)')
   } else {
     console.log('✓ Admin user already exists (username: admin)')

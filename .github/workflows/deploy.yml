@@ -110,3 +110,4 @@ jobs:
           DATABASE_URL=${{ secrets.SUPABASE_DB_URL }}
           GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}
         flags: '--allow-unauthenticated --port=4000' # Mở public nếu đây là API Public, nhớ chỉnh port nếu cần
+        flags: '--allow-unauthenticated --port=4000' # Mở public nếu đây là API Public, nhớ chỉnh port nếu cần

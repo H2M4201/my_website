@@ -1,3 +1,5 @@
+import { NotFoundError } from './notFoundError'
+
 export interface TripDTO {
   id: number
   title: string
@@ -26,9 +28,9 @@ export interface UpdateTripDTO {
   isActive?: boolean
 }
 
-export class TripNotFoundError extends Error {
+export class TripNotFoundError extends NotFoundError {
   constructor(id: number) {
-    super(`Trip with id ${id} not found`)
+    super('Trip', id)
     this.name = 'TripNotFoundError'
   }
 }

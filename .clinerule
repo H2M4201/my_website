@@ -68,5 +68,12 @@
             (Docker, infrastructure, pipeline changes)
    ```
 
-   Constraint: If a step is not required in the user prompt, skip it.
-   Test steps (6, 8, 10) are only run when the user explicitly asks for testing (e.g., "add tests", "test it", "make sure it works") or when modifying critical business logic that could break existing functionality.
+    Constraint: If a step is not required in the user prompt, skip it.
+    Test steps (6, 8, 10) are only run when the user explicitly asks for testing (e.g., "add tests", "test it", "make sure it works") or when modifying critical business logic that could break existing functionality.
+
+6. When making significant architecture changes (multi-service data flow modifications, caching strategy changes, cross-cutting concerns like active/inactive filtering, revalidation mechanisms, or service communication patterns), update ARCHITECTURE.md at the project root with:
+   - What changed and why
+   - The new data flow (which service calls which endpoint)
+   - Updated caching/revalidation behavior
+   - Updated filtering rules (who sees what data)
+   - Add a dated entry to the Revision History section

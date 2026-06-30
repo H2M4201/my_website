@@ -5,133 +5,41 @@ import {
   UpdateSectionDTO,
   SectionNotFoundError,
 } from '../dtos'
+import { createCrudService } from './crudService'
 
-function mapSectionToDTO(section: {
-  id: number
-  SectionName: string
-  Description: string | null
-  Href: string | null
-  IsActive: boolean
-  createdAt: Date
-  updatedAt: Date
-}): SectionDTO {
-  return {
-    id: section.id,
-    title: section.SectionName,
-    description: section.Description,
-    href: section.Href,
-    isActive: section.IsActive,
-    createdAt: section.createdAt,
-    updatedAt: section.updatedAt,
-  }
-}
+const service = createCrudService<SectionDTO, CreateSectionDTO, UpdateSectionDTO>({
+  model: prisma.section,
+  entityName: 'section',
+  NotFoundError: SectionNotFoundError,
+  mapToDTO: (s) => ({
+    id: s.id,
+    title: s.SectionName,
+    description: s.Description,
+    href: s.Href,
+    isActive: s.IsActive,
+    createdAt: s.createdAt,
+    updatedAt: s.updatedAt,
+  }),
+  mapCreateData: (data) => ({
+    SectionName: data.title,
+    Description: data.description || null,
+    Href: data.href || null,
+    IsActive: data.isActive ?? true,
+  }),
+  mergeUpdateData: (existing, data) => ({
+    SectionName: data.title !== undefined ? data.title : existing.SectionName,
+    Description: data.description !== undefined ? data.description : existing.Description,
+    Href: data.href !== undefined ? data.href : existing.Href,
+    IsActive: data.isActive !== undefined ? data.isActive : existing.IsActive,
+  }),
+})
 
-export async function getAllSections(): Promise<SectionDTO[]> {
-  try {
-    const sections = await prisma.section.findMany({
-      orderBy: { id: 'asc' },
-    })
-    return sections.map(mapSectionToDTO)
-  } catch (error) {
-    console.error('Error fetching sections:', error)
-    throw new Error('Failed to fetch sections from database')
-  }
-}
+export const getAllSections = service.getAll
+export const getAllSectionsIncludingInactive = service.getAllIncludingInactive
+export const getSectionById = service.getById
+export const createSection = service.create
+export const updateSection = service.update
+export const deleteSection = service.delete
+export const deleteAllSections = service.deleteAll
 
-export async function getSectionById(id: number): Promise<SectionDTO> {
-  try {
-    const section = await prisma.section.findUnique({
-      where: { id },
-    })
-
-    if (!section) {
-      throw new SectionNotFoundError(id)
-    }
-
-    return mapSectionToDTO(section)
-  } catch (error) {
-    if (error instanceof SectionNotFoundError) throw error
-    console.error('Error fetching section:', error)
-    throw new Error('Failed to fetch section from database')
-  }
-}
-
-export async function createSection(
-  data: CreateSectionDTO
-): Promise<SectionDTO> {
-  try {
-    const section = await prisma.section.create({
-      data: {
-        SectionName: data.title,
-        Description: data.description || null,
-        Href: data.href || null,
-        IsActive: data.isActive ?? true,
-      },
-    })
-    return mapSectionToDTO(section)
-  } catch (error) {
-    console.error('Error creating section:', error)
-    throw new Error('Failed to create section in database')
-  }
-}
-
-export async function updateSection(
-  id: number,
-  data: UpdateSectionDTO
-): Promise<SectionDTO> {
-  try {
-    const section = await prisma.section.findUnique({
-      where: { id },
-    })
-
-    if (!section) {
-      throw new SectionNotFoundError(id)
-    }
-
-    const updated = await prisma.section.update({
-      where: { id },
-      data: {
-        SectionName: data.title !== undefined ? data.title : section.SectionName,
-        Description:
-          data.description !== undefined ? data.description : section.Description,
-        Href: data.href !== undefined ? data.href : section.Href,
-        IsActive: data.isActive !== undefined ? data.isActive : section.IsActive,
-      },
-    })
-
-    return mapSectionToDTO(updated)
-  } catch (error) {
-    if (error instanceof SectionNotFoundError) throw error
-    console.error('Error updating section:', error)
-    throw new Error('Failed to update section in database')
-  }
-}
-
-export async function deleteSection(id: number): Promise<void> {
-  try {
-    const section = await prisma.section.findUnique({
-      where: { id },
-    })
-
-    if (!section) {
-      throw new SectionNotFoundError(id)
-    }
-
-    await prisma.section.delete({
-      where: { id },
-    })
-  } catch (error) {
-    if (error instanceof SectionNotFoundError) throw error
-    console.error('Error deleting section:', error)
-    throw new Error('Failed to delete section from database')
-  }
-}
-
-export async function deleteAllSections(): Promise<void> {
-  try {
-    await prisma.section.deleteMany()
-  } catch (error) {
-    console.error('Error deleting all sections:', error)
-    throw new Error('Failed to delete all sections from database')
-  }
-}
+export { SectionNotFoundError } from '../dtos'

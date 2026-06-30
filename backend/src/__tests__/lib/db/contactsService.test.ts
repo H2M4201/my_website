@@ -1,4 +1,4 @@
-import { getAllContacts } from '@/db/contactsService'
+import { getAllContacts } from '@/db/services/contactsService'
 import { prisma } from '@/db/prisma'
 
 jest.mock('@/db/prisma', () => ({

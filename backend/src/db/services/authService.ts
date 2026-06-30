@@ -3,11 +3,19 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default-dev-secret-change-in-production'
+const JWT_SECRET = (() => {
+  const secret = process.env.JWT_SECRET
+  if (!secret) {
+    throw new Error('FATAL: JWT_SECRET environment variable is required')
+  }
+  return secret
+})()
+
 const JWT_EXPIRES_IN = '24h'
 const MAX_FAILED_ATTEMPTS = 5
-const LOCKOUT_DURATION_MS = 15 * 60 * 1000 // 15 minutes
-const PASSWORD_MAX_AGE_MS = 60 * 24 * 60 * 60 * 1000 // 60 days
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000
+const PASSWORD_MAX_AGE_MS = 60 * 24 * 60 * 60 * 1000
+const BCRYPT_ROUNDS = 12
 
 export interface AdminUserDTO {
   id: number
@@ -20,7 +28,11 @@ export interface AdminUserDTO {
 export interface LoginResponse {
   token: string
   user: AdminUserDTO
-  passwordExpired?: boolean
+}
+
+export interface ForgotPasswordResponse {
+  message: string
+  tempPassword?: string
 }
 
 export class AuthError extends Error {
@@ -33,7 +45,7 @@ export class AuthError extends Error {
 export class AccountLockedError extends Error {
   public lockedUntil: Date
   constructor(lockedUntil: Date) {
-    super(`Account is locked. Try again after ${lockedUntil.toISOString()}`)
+    super('Account is locked. Try again after ' + lockedUntil.toISOString())
     this.name = 'AccountLockedError'
     this.lockedUntil = lockedUntil
   }
@@ -46,7 +58,23 @@ export class PasswordExpiredError extends Error {
   }
 }
 
-/** Check password complexity: min 8 chars, uppercase, lowercase, digit, special char */
+const tokenBlacklist = new Map<string, number>()
+
+setInterval(() => {
+  const now = Date.now()
+  for (const [token, expiresAt] of tokenBlacklist) {
+    if (expiresAt <= now) tokenBlacklist.delete(token)
+  }
+}, 60_000).unref()
+
+export function blacklistToken(token: string, expiresInMs: number = 24 * 60 * 60 * 1000): void {
+  tokenBlacklist.set(token, Date.now() + expiresInMs)
+}
+
+export function isTokenBlacklisted(token: string): boolean {
+  return tokenBlacklist.has(token)
+}
+
 export function validatePasswordComplexity(password: string): string | null {
   if (password.length < 8) return 'Password must be at least 8 characters long'
   if (!/[A-Z]/.test(password)) return 'Password must contain at least one uppercase letter'
@@ -56,9 +84,6 @@ export function validatePasswordComplexity(password: string): string | null {
   return null
 }
 
-/**
- * Authenticate an admin user with lockout tracking, password age checks.
- */
 export async function loginWithUsername(
   username: string,
   plaintextPassword: string
@@ -74,9 +99,9 @@ export async function loginWithUsername(
     lockedUntil: Date | null
     passwordChangedAt: Date | null
   }>>(
-    `SELECT id, username, password, email, name, roleId, 
-            failedLoginAttempts, lockedUntil, passwordChangedAt
-     FROM AdminUser WHERE username = @P1`,
+    `SELECT id, username, password, email, name, "roleId",
+            "failedLoginAttempts", "lockedUntil", "passwordChangedAt"
+     FROM "AdminUser" WHERE username = $1`,
     username
   )
 
@@ -85,57 +110,48 @@ export async function loginWithUsername(
     throw new AuthError('Invalid username or password')
   }
 
-  // Check if account is locked
   if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
     throw new AccountLockedError(user.lockedUntil)
   }
 
-  // Verify password
-  const isValid = bcrypt.compareSync(plaintextPassword, user.password)
-  
+  const isValid = await bcrypt.compare(plaintextPassword, user.password)
+
   if (!isValid) {
-    // Increment failed login attempts
     const newAttempts = user.failedLoginAttempts + 1
-    
+
     if (newAttempts >= MAX_FAILED_ATTEMPTS) {
       const lockUntil = new Date(Date.now() + LOCKOUT_DURATION_MS)
       await prisma.$executeRawUnsafe(
-        `UPDATE AdminUser SET failedLoginAttempts = @P1, lockedUntil = @P2 WHERE id = @P3`,
-        newAttempts,
-        lockUntil,
-        user.id
+        `UPDATE "AdminUser" SET "failedLoginAttempts" = $1, "lockedUntil" = $2 WHERE id = $3`,
+        newAttempts, lockUntil, user.id
       )
       throw new AccountLockedError(lockUntil)
     } else {
       await prisma.$executeRawUnsafe(
-        `UPDATE AdminUser SET failedLoginAttempts = @P1 WHERE id = @P2`,
-        newAttempts,
-        user.id
+        `UPDATE "AdminUser" SET "failedLoginAttempts" = $1 WHERE id = $2`,
+        newAttempts, user.id
       )
     }
-    
+
     throw new AuthError('Invalid username or password')
   }
 
-  // Successful login — reset failed attempts and lockout, check password age
   await prisma.$executeRawUnsafe(
-    `UPDATE AdminUser SET failedLoginAttempts = 0, lockedUntil = NULL WHERE id = @P1`,
+    `UPDATE "AdminUser" SET "failedLoginAttempts" = 0, "lockedUntil" = NULL WHERE id = $1`,
     user.id
   )
 
-  // Check password age
-  let passwordExpired = false
   if (user.passwordChangedAt) {
     const ageMs = Date.now() - new Date(user.passwordChangedAt).getTime()
     if (ageMs > PASSWORD_MAX_AGE_MS) {
-      passwordExpired = true
+      throw new PasswordExpiredError()
     }
   }
 
   const token = jwt.sign(
     { id: user.id, username: user.username, roleId: user.roleId },
     JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
+    { algorithm: 'HS256', expiresIn: JWT_EXPIRES_IN }
   )
 
   return {
@@ -147,57 +163,93 @@ export async function loginWithUsername(
       name: user.name,
       roleId: user.roleId,
     },
-    passwordExpired,
   }
 }
 
-/**
- * Forgot password: generate a new random password, update it in DB, return it.
- * In production, this would send an email instead.
- */
-export async function forgotPassword(usernameOrEmail: string): Promise<{ message: string; tempPassword?: string }> {
+export async function forgotPassword(
+  usernameOrEmail: string
+): Promise<ForgotPasswordResponse> {
   const users = await prisma.$queryRawUnsafe<Array<{
     id: number
     username: string
     email: string | null
   }>>(
-    `SELECT id, username, email FROM AdminUser WHERE username = @P1 OR email = @P1`,
+    `SELECT id, username, email FROM "AdminUser" WHERE username = $1 OR email = $1`,
     usernameOrEmail
   )
 
   const user = users[0]
   if (!user) {
-    // Don't reveal whether user exists — return generic message
     return { message: 'If the account exists, a password reset link has been sent.' }
   }
 
-  // Generate a random password (16 chars, meets complexity)
   const tempPassword = generateSecurePassword()
-  const hashedPassword = bcrypt.hashSync(tempPassword, 10)
-  const now = new Date().toISOString()
+  const hashedPassword = await bcrypt.hash(tempPassword, BCRYPT_ROUNDS)
+  const now = new Date()
+
+  const token = crypto.randomBytes(32).toString('hex')
+  const tokenExpires = new Date(Date.now() + 60 * 60 * 1000)
 
   await prisma.$executeRawUnsafe(
-    `UPDATE AdminUser SET password = @P1, passwordChangedAt = @P2, 
-            failedLoginAttempts = 0, lockedUntil = NULL
-     WHERE id = @P3`,
-    hashedPassword,
-    now,
-    user.id
+    `UPDATE "AdminUser" SET password = $1, "passwordChangedAt" = $2,
+            "failedLoginAttempts" = 0, "lockedUntil" = NULL,
+            "passwordResetToken" = $3, "passwordResetTokenExpires" = $4
+     WHERE id = $5`,
+    hashedPassword, now, token, tokenExpires, user.id
   )
 
-  // In development, return the temp password so the user can see it
-  // In production, this would be sent via email
-  console.log(`[DEV] Password reset for ${user.username}: new password = ${tempPassword}`)
-  
+  console.log(`Password reset for ${user.username}: token=${token}`)
+
+  const isDev = process.env.NODE_ENV === 'development'
   return {
-    message: 'Password has been reset. Check your email for the new password.',
-    tempPassword, // Only returned in dev mode
+    message: 'If the account exists, a password reset link has been sent.',
+    ...(isDev ? { tempPassword } : {}),
   }
 }
 
-/**
- * Change password for an authenticated user.
- */
+export async function resetPasswordWithToken(
+  resetToken: string,
+  newPassword: string
+): Promise<{ message: string }> {
+  const users = await prisma.$queryRawUnsafe<Array<{
+    id: number
+    username: string
+    passwordResetToken: string | null
+    passwordResetTokenExpires: Date | null
+  }>>(
+    `SELECT id, username, "passwordResetToken", "passwordResetTokenExpires"
+     FROM "AdminUser" WHERE "passwordResetToken" = $1`,
+    resetToken
+  )
+
+  const user = users[0]
+  if (!user || !user.passwordResetTokenExpires) {
+    throw new AuthError('Invalid or expired reset token')
+  }
+
+  if (new Date(user.passwordResetTokenExpires) < new Date()) {
+    throw new AuthError('Reset token has expired')
+  }
+
+  const complexityError = validatePasswordComplexity(newPassword)
+  if (complexityError) {
+    throw new AuthError(complexityError)
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_ROUNDS)
+  const now = new Date()
+
+  await prisma.$executeRawUnsafe(
+    `UPDATE "AdminUser" SET password = $1, "passwordChangedAt" = $2,
+            "passwordResetToken" = NULL, "passwordResetTokenExpires" = NULL,
+            "failedLoginAttempts" = 0, "lockedUntil" = NULL
+     WHERE id = $3`,
+    hashedPassword, now, user.id
+  )
+
+  return { message: 'Password has been reset successfully.' }
+}
+
 export async function changePassword(
   userId: number,
   currentPassword: string,
@@ -207,7 +259,7 @@ export async function changePassword(
     id: number
     password: string
   }>>(
-    `SELECT id, password FROM AdminUser WHERE id = @P1`,
+    `SELECT id, password FROM "AdminUser" WHERE id = $1`,
     userId
   )
 
@@ -216,37 +268,60 @@ export async function changePassword(
     throw new AuthError('User not found')
   }
 
-  // Verify current password
-  const isValid = bcrypt.compareSync(currentPassword, user.password)
+  const isValid = await bcrypt.compare(currentPassword, user.password)
   if (!isValid) {
     throw new AuthError('Current password is incorrect')
   }
 
-  // Validate new password complexity
+  const isSamePassword = await bcrypt.compare(newPassword, user.password)
+  if (isSamePassword) {
+    throw new AuthError('New password must be different from current password')
+  }
+
   const complexityError = validatePasswordComplexity(newPassword)
   if (complexityError) {
     throw new AuthError(complexityError)
   }
 
-  // Hash and update
-  const hashedPassword = bcrypt.hashSync(newPassword, 10)
-  const now = new Date().toISOString()
-  
+  const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_ROUNDS)
+  const now = new Date()
+
   await prisma.$executeRawUnsafe(
-    `UPDATE AdminUser SET password = @P1, passwordChangedAt = @P2, 
-            failedLoginAttempts = 0, lockedUntil = NULL
-     WHERE id = @P3`,
-    hashedPassword,
-    now,
-    user.id
+    `UPDATE "AdminUser" SET password = $1, "passwordChangedAt" = $2,
+            "failedLoginAttempts" = 0, "lockedUntil" = NULL
+     WHERE id = $3`,
+    hashedPassword, now, user.id
   )
 
   return { message: 'Password changed successfully' }
 }
 
-/**
- * Generate a cryptographically secure random password meeting complexity requirements.
- */
+export async function getUserById(userId: number): Promise<AdminUserDTO> {
+  const users = await prisma.$queryRawUnsafe<Array<{
+    id: number
+    username: string
+    email: string | null
+    name: string | null
+    roleId: number | null
+  }>>(
+    `SELECT id, username, email, name, "roleId" FROM "AdminUser" WHERE id = $1`,
+    userId
+  )
+
+  const user = users[0]
+  if (!user) {
+    throw new AuthError('User not found')
+  }
+
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    name: user.name,
+    roleId: user.roleId,
+  }
+}
+
 function generateSecurePassword(): string {
   const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   const lower = 'abcdefghijklmnopqrstuvwxyz'
@@ -254,7 +329,6 @@ function generateSecurePassword(): string {
   const special = '!@#$%^&*()-_=+'
   const all = upper + lower + digits + special
 
-  // Ensure at least one of each character type
   const required = [
     upper[crypto.randomInt(upper.length)],
     lower[crypto.randomInt(lower.length)],
@@ -262,27 +336,29 @@ function generateSecurePassword(): string {
     special[crypto.randomInt(special.length)],
   ]
 
-  // Fill remaining 12 characters randomly
   for (let i = 0; i < 12; i++) {
     required.push(all[crypto.randomInt(all.length)])
   }
 
-  // Shuffle using Fisher-Yates
   for (let i = required.length - 1; i > 0; i--) {
-    const j = crypto.randomInt(i + 1);
-    [required[i], required[j]] = [required[j], required[i]]
+    const j = crypto.randomInt(i + 1)
+    ;[required[i], required[j]] = [required[j], required[i]]
   }
 
   return required.join('')
 }
 
-/**
- * Verify a JWT token and return decoded payload.
- */
 export function verifyToken(token: string): { id: number; username: string; roleId: number | null } {
+  if (isTokenBlacklisted(token)) {
+    throw new AuthError('Token has been revoked')
+  }
+
   try {
-    return jwt.verify(token, JWT_SECRET) as { id: number; username: string; roleId: number | null }
-  } catch {
+    return jwt.verify(token, JWT_SECRET, {
+      algorithms: ['HS256'],
+    }) as { id: number; username: string; roleId: number | null }
+  } catch (err) {
+    if (err instanceof AuthError) throw err
     throw new AuthError('Invalid or expired token')
   }
 }

@@ -1,25 +1,25 @@
 import request from 'supertest'
 import { createApp } from '@/app'
-import * as sectionsService from '@/db/sectionsService'
+import * as sectionsService from '@/db/services/sectionsService'
 
-jest.mock('@/db/sectionsService')
+jest.mock('@/db/services/sectionsService')
 
 const app = createApp()
 
-describe('GET /api/sections', () => {
+describe('GET /api/v1/sections', () => {
   afterEach(() => {
     jest.clearAllMocks()
   })
 
   it('should return 200 with sections array', async () => {
     const mockSections = [
-      { id: 1, title: 'Resume', description: 'Experience', href: '/resume' },
-      { id: 2, title: 'Trips', description: 'Travel', href: '/trips' },
+      { id: 1, title: 'Resume', description: 'Experience', href: '/resume', isActive: true },
+      { id: 2, title: 'Trips', description: 'Travel', href: '/trips', isActive: true },
     ]
 
     ;(sectionsService.getAllSections as jest.Mock).mockResolvedValue(mockSections)
 
-    const response = await request(app).get('/api/sections')
+    const response = await request(app).get('/api/v1/sections')
 
     expect(response.status).toBe(200)
     expect(response.body).toEqual(mockSections)
@@ -31,7 +31,7 @@ describe('GET /api/sections', () => {
       new Error('DB connection failed')
     )
 
-    const response = await request(app).get('/api/sections')
+    const response = await request(app).get('/api/v1/sections')
 
     expect(response.status).toBe(500)
     expect(response.body).toHaveProperty('error')
@@ -40,7 +40,7 @@ describe('GET /api/sections', () => {
   it('should handle empty sections array', async () => {
     ;(sectionsService.getAllSections as jest.Mock).mockResolvedValue([])
 
-    const response = await request(app).get('/api/sections')
+    const response = await request(app).get('/api/v1/sections')
 
     expect(response.status).toBe(200)
     expect(response.body).toEqual([])

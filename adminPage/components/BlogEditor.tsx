@@ -126,6 +126,49 @@ export function BlogEditor({
     }
   }, [onChange, updateActiveCommands])
 
+  // Unwrap a ul/ol list back to plain div blocks (toggle off)
+  const unwrapList = useCallback(() => {
+    try {
+      const sel = window.getSelection()
+      if (!sel || !sel.anchorNode || !editorRef.current) return false
+
+      let node: Node | null = sel.anchorNode
+      let listEl: HTMLUListElement | HTMLOListElement | null = null
+      while (node && node !== editorRef.current) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const el = node as HTMLElement
+          if (el.tagName === 'UL' || el.tagName === 'OL') {
+            listEl = el as HTMLUListElement | HTMLOListElement
+            break
+          }
+        }
+        node = node.parentNode
+      }
+      if (!listEl) return false
+
+      const parent = listEl.parentNode
+      if (!parent) return false
+
+      const fragment = document.createDocumentFragment()
+      const items = Array.from(listEl.children)
+      for (const li of items) {
+        const div = document.createElement('div')
+        while (li.firstChild) div.appendChild(li.firstChild)
+        if (!div.textContent?.trim()) div.appendChild(document.createElement('br'))
+        fragment.appendChild(div)
+      }
+
+      parent.replaceChild(fragment, listEl)
+      onChange(editorRef.current.innerHTML)
+      updateActiveCommands()
+      console.log('[BlogEditor] unwrapList applied', { tagName: listEl.tagName, itemCount: items.length })
+      return true
+    } catch (err) {
+      console.warn('[BlogEditor] unwrapList error', err)
+      return false
+    }
+  }, [onChange, updateActiveCommands])
+
   // Fallback for formatBlock: replace nearest block element tag
   const fallbackFormatBlock = useCallback((rawValue?: string) => {
     try {
@@ -141,7 +184,24 @@ export function BlogEditor({
       while (el && el !== editorRef.current && !['P','DIV','LI','H1','H2','BLOCKQUOTE','PRE','SECTION','ARTICLE'].includes(el.tagName)) {
         el = el.parentElement
       }
-      if (!el || el === editorRef.current) return false
+      if (!el) return false
+      if (el === editorRef.current) {
+        // Text is direct child of contentEditable — wrap selection range in new tag
+        if (selection.rangeCount === 0) return false
+        const range = selection.getRangeAt(0)
+        const newEl = document.createElement(tag)
+        if (range.collapsed) {
+          newEl.appendChild(document.createElement('br'))
+        } else {
+          const content = range.extractContents()
+          newEl.appendChild(content)
+        }
+        range.insertNode(newEl)
+        onChange(editorRef.current.innerHTML)
+        updateActiveCommands()
+        console.log('[BlogEditor] fallbackFormatBlock applied (direct editor child)', { tag })
+        return true
+      }
 
       const newEl = document.createElement(tag)
       while (el.firstChild) newEl.appendChild(el.firstChild)
@@ -302,10 +362,27 @@ export function BlogEditor({
           else success = true
           break
         case 'insertUnorderedList':
-          success = fallbackInsertList(false, selText ?? '')
-          break
         case 'insertOrderedList':
-          success = fallbackInsertList(true, selText ?? '')
+          {
+            const isOrdered = command === 'insertOrderedList'
+            let inList = false
+            let n: Node | null = selection?.anchorNode ?? null
+            while (n && n !== editorRef.current) {
+              if (n.nodeType === Node.ELEMENT_NODE) {
+                const el = n as HTMLElement
+                if (el.tagName === 'UL' || el.tagName === 'OL') {
+                  inList = true
+                  break
+                }
+              }
+              n = n.parentNode
+            }
+            if (inList) {
+              success = unwrapList()
+            } else {
+              success = fallbackInsertList(isOrdered, selText ?? '')
+            }
+          }
           break
         case 'formatBlock':
           success = !!fallbackFormatBlock(value)
@@ -370,32 +447,12 @@ export function BlogEditor({
       after: editorHtmlAfter ? editorHtmlAfter.slice(0, 200) : '',
     })
 
-    // If list commands didn't change the HTML, try DOM fallback using captured selection text
-    if ((command === 'insertUnorderedList' || command === 'insertOrderedList')) {
-      const unchanged = editorHtmlBefore === editorHtmlAfter
-      if (!success || unchanged) {
-        const usedSelText = selText ?? ''
-        const fallbackOk = fallbackInsertList(command === 'insertOrderedList', usedSelText)
-        console.log('[BlogEditor] execCommand list fallback', { command, success, unchanged, fallbackOk })
-      }
-    }
-
-    // If formatBlock failed or didn't change HTML, try DOM fallback
-    if (command === 'formatBlock') {
-      const unchanged = editorHtmlBefore === editorHtmlAfter
-      if (!success || unchanged) {
-        const raw = value || ''
-        const fallbackOk = fallbackFormatBlock(raw)
-        console.log('[BlogEditor] execCommand formatBlock fallback', { command, value, success, unchanged, fallbackOk })
-      }
-    }
-
     if (editorRef.current) {
       editorRef.current.focus()
       onChange(editorRef.current.innerHTML)
       updateActiveCommands()
     }
-  }, [onChange, updateActiveCommands, fallbackInsertList, fallbackFormatBlock, getSelectionRange, insertFragmentAtRange, wrapSelectionWith, unwrapAncestorTag, applyAlignment])
+  }, [onChange, updateActiveCommands, fallbackInsertList, fallbackFormatBlock, unwrapList, getSelectionRange, insertFragmentAtRange, wrapSelectionWith, unwrapAncestorTag, applyAlignment])
 
   // Determine the current block-level element at the cursor position
   // Uses DOM traversal instead of deprecated queryCommandValue
@@ -622,7 +679,7 @@ export function BlogEditor({
             onMouseUp={updateActiveCommands}
             onKeyUp={updateActiveCommands}
             data-placeholder={placeholder}
-            className="p-4 text-gray-200 outline-none min-h-[300px] focus:ring-0"
+            className="p-4 text-gray-200 outline-none min-h-[300px] focus:ring-0 [&_ul]:list-disc [&_ul]:ps-6 [&_ol]:list-decimal [&_ol]:ps-6"
             style={{ minHeight: `${minHeight}px` }}
           />
         )}

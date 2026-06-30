@@ -1,3 +1,5 @@
+import { NotFoundError } from './notFoundError'
+
 export interface BlogDTO {
   id: number
   title: string
@@ -20,9 +22,9 @@ export interface UpdateBlogDTO {
   isActive?: boolean
 }
 
-export class BlogNotFoundError extends Error {
+export class BlogNotFoundError extends NotFoundError {
   constructor(id: number) {
-    super(`Blog with id ${id} not found`)
+    super('Blog', id)
     this.name = 'BlogNotFoundError'
   }
 }

@@ -113,6 +113,7 @@ export function CrudTemplate({
         onDelete={handleDelete}
         onToggleActive={onToggleActive}
         getIsActive={getIsActive}
+        onToggleSuccess={mutate}
         isLoading={isLoading}
       />
 

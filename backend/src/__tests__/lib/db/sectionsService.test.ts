@@ -1,4 +1,4 @@
-import { getAllSections, getSectionById, SectionNotFoundError } from '@/db/sectionsService'
+import { getAllSections, getSectionById, SectionNotFoundError } from '@/db/services/sectionsService'
 import { prisma } from '@/db/prisma'
 
 jest.mock('@/db/prisma', () => ({

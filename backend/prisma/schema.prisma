@@ -1,14 +1,14 @@
 // ============================================
-// Prisma Schema - PostgreSQL (Docker / Supabase)
+// Prisma Schema - PostgreSQL
 // ============================================
-// This file is the DEFAULT schema used for Docker/Supabase.
-// For local development with SQL Server, run: npm run prisma:generate:local
-// which switches to schema.sqlserver.prisma temporarily.
+// Single source of truth for all environments (dev & prod).
+// Migrations are committed to Git and deployed via CI/CD.
 // ============================================
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {

@@ -1,3 +1,4 @@
+export * from './notFoundError'
 export * from './sectionDTO'
 export * from './contactDTO'
 export * from './blogDTO'

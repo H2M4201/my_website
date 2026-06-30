@@ -1,4 +1,4 @@
-import { revalidateTag } from 'next/cache'
+import { revalidateTag, revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Revalidate] Revalidating tag: "${tag}"`)
     revalidateTag(tag)
+    revalidatePath('/', 'layout')
 
     return NextResponse.json({ revalidated: true, tag })
   } catch (error) {

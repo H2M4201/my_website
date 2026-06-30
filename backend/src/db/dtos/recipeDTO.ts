@@ -1,3 +1,5 @@
+import { NotFoundError } from './notFoundError'
+
 export interface RecipeDTO {
   id: number
   name: string
@@ -23,9 +25,9 @@ export interface UpdateRecipeDTO {
   isActive?: boolean
 }
 
-export class RecipeNotFoundError extends Error {
+export class RecipeNotFoundError extends NotFoundError {
   constructor(id: number) {
-    super(`Recipe with id ${id} not found`)
+    super('Recipe', id)
     this.name = 'RecipeNotFoundError'
   }
 }

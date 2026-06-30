@@ -12,11 +12,10 @@ import { adminRouter, ADMIN_API_PREFIX } from './adminRoutes'
 import {
   getAllExperiences,
   getExperienceById,
-  getAllExpertiseCategories,
+  getAllExpertiseCategoriesIncludingInactive,
   getExpertiseCategoryById,
-  getAllJobDescriptions,
-  ExperienceNotFoundError,
-  ExpertiseCategoryNotFoundError,
+  getAllJobDescriptionsIncludingInactive,
+  NotFoundError,
   JobDescriptionNotFoundError,
 } from '../db'
 import {
@@ -39,7 +38,7 @@ adminReadRouter.get('/', async (_req, res) => {
   try {
     const experiences = await getAllExperiences(true)
     const validated = experiencesListResponseSchema.parse(experiences)
-    res.status(200).json(validated)
+    res.status(200).set({ 'Cache-Control': 'no-store' }).json(validated)
   } catch (error) {
     console.error('GET /api/v1/experiences error:', error)
     res.status(500).json({ error: 'Failed to fetch experiences' })
@@ -52,9 +51,9 @@ adminReadRouter.get('/:id', async (req, res) => {
     const id = experienceIdParamSchema.parse(req.params.id)
     const experience = await getExperienceById(id)
     const validated = experienceResponseSchema.parse(experience)
-    res.status(200).json(validated)
+    res.status(200).set({ 'Cache-Control': 'no-store' }).json(validated)
   } catch (error) {
-    if (error instanceof ExperienceNotFoundError) {
+    if (error instanceof NotFoundError) {
       res.status(404).json({ error: error.message })
       return
     }
@@ -66,9 +65,9 @@ adminReadRouter.get('/:id', async (req, res) => {
 const expertiseReadRouter = Router()
 expertiseReadRouter.get('/', async (_req, res) => {
   try {
-    const categories = await getAllExpertiseCategories()
+    const categories = await getAllExpertiseCategoriesIncludingInactive()
     const validated = expertiseCategoriesListResponseSchema.parse(categories)
-    res.status(200).json(validated)
+    res.status(200).set({ 'Cache-Control': 'no-store' }).json(validated)
   } catch (error) {
     console.error('GET /api/v1/expertises error:', error)
     res.status(500).json({ error: 'Failed to fetch expertise categories' })
@@ -80,9 +79,9 @@ expertiseReadRouter.get('/:id', async (req, res) => {
     const id = expertiseCategoryIdParamSchema.parse(req.params.id)
     const category = await getExpertiseCategoryById(id)
     const validated = expertiseCategoryResponseSchema.parse(category)
-    res.status(200).json(validated)
+    res.status(200).set({ 'Cache-Control': 'no-store' }).json(validated)
   } catch (error) {
-    if (error instanceof ExpertiseCategoryNotFoundError) {
+    if (error instanceof NotFoundError) {
       res.status(404).json({ error: error.message })
       return
     }
@@ -94,9 +93,9 @@ expertiseReadRouter.get('/:id', async (req, res) => {
 const jobDescriptionReadRouter = Router()
 jobDescriptionReadRouter.get('/', async (_req, res) => {
   try {
-    const items = await getAllJobDescriptions()
+    const items = await getAllJobDescriptionsIncludingInactive()
     const validated = jobDescriptionsListResponseSchema.parse(items)
-    res.status(200).json(validated)
+    res.status(200).set({ 'Cache-Control': 'no-store' }).json(validated)
   } catch (error) {
     console.error('GET /api/v1/job-descriptions error:', error)
     res.status(500).json({ error: 'Failed to fetch job descriptions' })
@@ -106,15 +105,15 @@ jobDescriptionReadRouter.get('/', async (_req, res) => {
 jobDescriptionReadRouter.get('/:id', async (req, res) => {
   try {
     const id = jobDescriptionIdParamSchema.parse(req.params.id)
-    const item = await getAllJobDescriptions() // Use getAll and filter since there's no standalone get
+    const item = await getAllJobDescriptionsIncludingInactive() // Use getAll and filter since there's no standalone get
     const found = item.find(j => j.id === id)
     if (!found) {
       throw new JobDescriptionNotFoundError(id)
     }
     const validated = jobDescriptionResponseSchema.parse(found)
-    res.status(200).json(validated)
+    res.status(200).set({ 'Cache-Control': 'no-store' }).json(validated)
   } catch (error) {
-    if (error instanceof JobDescriptionNotFoundError) {
+    if (error instanceof NotFoundError) {
       res.status(404).json({ error: error.message })
       return
     }
